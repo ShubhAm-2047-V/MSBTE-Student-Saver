@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}MSBTE What-If Academic Simulator | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="simulator-wrapper">
+    <!-- Header Card -->
+    <div class="card-clean p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-purple-subtle text-purple fw-bold font-monospace px-3 py-1 rounded-pill">
+                        MSBTE I/K-Scheme Evaluation Engine
+                    </span>
+                    <span class="badge bg-light text-muted border rounded-pill">
+                        AI What-If Academic Model
+                    </span>
+                </div>
+                <h3 class="fw-bold text-dark mb-1" style="font-family: 'Outfit', sans-serif;">
+                    <i class="fa-solid fa-sliders text-primary me-2"></i>Interactive Academic & Grade Simulator
+                </h3>
+                <p class="text-muted small mb-0">Simulate Progressive Assessment (Class Tests + Micro-Project), ESE theory exam scores, and live ML performance predictions.</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="resetSimulator()">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Reset to Defaults
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Left Column: Interactive Simulation Sliders -->
+        <div class="col-lg-7">
+            <div class="card-clean p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="fa-solid fa-calculator text-primary me-2"></i>Adjust Simulation Parameters
+                </h5>
+
+                <!-- 1. Attendance Slider -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold text-dark mb-0">
+                            <i class="fa-solid fa-calendar-check text-success me-1"></i> Aggregate Attendance Percentage:
+                        </label>
+                        <span class="badge bg-success-subtle text-success fs-6 fw-bold font-monospace px-3 py-1 rounded-pill" id="attVal">78%</span>
+                    </div>
+                    <input type="range" class="form-range" id="attSlider" min="30" max="100" step="1" value="78" oninput="updateSim()">
+                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
+                        <span>30% (Critical)</span>
+                        <span>60% (Warning)</span>
+                        <span>75% (MSBTE Norm)</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+
+                <!-- 2. MSBTE Progressive Assessment (PA) Breakdown -->
+                <div class="p-3 bg-light rounded-3 border mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold text-dark small text-uppercase">
+                            <i class="fa-solid fa-pen-ruler text-primary me-1"></i> MSBTE Continuous Internal Assessment (PA - 30 Marks)
+                        </span>
+                        <span class="badge bg-primary fs-6 font-monospace px-3" id="paTotalBadge">24.5 / 30</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Class Test 1 -->
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted mb-1">Class Test 1 (Max 20): <strong id="ct1Val" class="text-dark">16</strong></label>
+                            <input type="range" class="form-range" id="ct1Slider" min="0" max="20" step="0.5" value="16" oninput="updateSim()">
+                        </div>
+                        <!-- Class Test 2 -->
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted mb-1">Class Test 2 (Max 20): <strong id="ct2Val" class="text-dark">17</strong></label>
+                            <input type="range" class="form-range" id="ct2Slider" min="0" max="20" step="0.5" value="17" oninput="updateSim()">
+                        </div>
+                        <!-- Micro-Project -->
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted mb-1">Micro-Project (Max 10): <strong id="mpVal" class="text-dark">8</strong></label>
+                            <input type="range" class="form-range" id="mpSlider" min="0" max="10" step="0.5" value="8" oninput="updateSim()">
+                        </div>
+                    </div>
+                    <div class="text-muted mt-2 pt-2 border-top" style="font-size: 0.72rem;">
+                        Formula: <code>PA = Avg(Test 1, Test 2) + Micro-Project Marks = <span id="paCalcLabel">(16 + 17)/2 + 8 = 24.5</span></code>
+                    </div>
+                </div>
+
+                <!-- 3. End Semester Exam (ESE) Target -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold text-dark mb-0">
+                            <i class="fa-solid fa-file-lines text-warning me-1"></i> Target ESE Theory Exam Score (Max 70):
+                        </label>
+                        <span class="badge bg-warning-subtle text-warning-emphasis fs-6 fw-bold font-monospace px-3 py-1 rounded-pill" id="eseVal">48 / 70</span>
+                    </div>
+                    <input type="range" class="form-range" id="eseSlider" min="0" max="70" step="1" value="48" oninput="updateSim()">
+                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
+                        <span>0 Marks</span>
+                        <span>28 Marks (Passing Threshold)</span>
+                        <span>70 Marks (Full)</span>
+                    </div>
+                </div>
+
+                <!-- 4. Backlogs and Baseline Percentage -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-dark">Active Backlogs: <strong id="backlogVal" class="text-danger">0</strong></label>
+                        <input type="range" class="form-range" id="backlogSlider" min="0" max="5" step="1" value="0" oninput="updateSim()">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-dark">Past Sem / Baseline %: <strong id="pastVal" class="text-primary">72%</strong></label>
+                        <input type="range" class="form-range" id="pastSlider" min="40" max="95" step="1" value="72" oninput="updateSim()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Live Calculated Results & ML Predictions -->
+        <div class="col-lg-5">
+            <!-- Simulated Subject Score Card -->
+            <div class="card-clean p-4 mb-4">
+                <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="fa-solid fa-chart-pie text-success me-2"></i>Simulated Academic Outcomes
+                </h5>
+
+                <div class="row g-2 text-center mb-3">
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="text-muted small fw-semibold text-uppercase">Total Subject Score</div>
+                            <div class="fs-4 fw-bold text-primary" id="totalMarksScore">72.5 / 100</div>
+                            <small class="text-muted" id="totalPctLabel">72.5% Obtained</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="text-muted small fw-semibold text-uppercase">Course Result</div>
+                            <div class="fs-4 fw-bold text-success" id="passFailBadge">PASS</div>
+                            <small class="text-muted">Passing Criteria: 40/100</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ML Predicted Tier -->
+                <div class="p-3 rounded-3 border mb-3 bg-light" id="mlCardWrapper">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small fw-bold text-dark text-uppercase">
+                            <i class="fa-solid fa-brain text-purple me-1"></i> ML Decision Tree Prediction:
+                        </span>
+                        <span class="badge bg-primary fs-6 rounded-pill px-3 py-1" id="predCatBadge">Good</span>
+                    </div>
+                    <p class="small text-muted mb-2" id="predSummary">
+                        Solid academic indicators with steady continuous evaluation marks.
+                    </p>
+                    <div class="small fw-semibold text-dark mb-1">Simulated Strategy:</div>
+                    <ul class="small text-muted ps-3 mb-0" id="predRecList">
+                        <li>Maintain attendance above 75% for board exam eligibility.</li>
+                        <li>Practice previous MSBTE model answer papers.</li>
+                    </ul>
+                </div>
+
+                <!-- ATKT Status Banner -->
+                <div class="p-3 bg-light rounded-3 border" id="atktSimBox">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small fw-bold text-dark">MSBTE ATKT & Diploma Class Status:</div>
+                            <div class="small text-muted" id="atktMsg">Eligible for Final Diploma Award without pending backlogs.</div>
+                        </div>
+                        <span class="badge bg-success rounded-pill px-3 py-1" id="atktBadge">Clear Pass</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateSim() {
+    const att = parseFloat(document.getElementById('attSlider').value);
+    const ct1 = parseFloat(document.getElementById('ct1Slider').value);
+    const ct2 = parseFloat(document.getElementById('ct2Slider').value);
+    const mp = parseFloat(document.getElementById('mpSlider').value);
+    const ese = parseFloat(document.getElementById('eseSlider').value);
+    const backlogs = parseInt(document.getElementById('backlogSlider').value);
+    const past = parseFloat(document.getElementById('pastSlider').value);
+
+    // Update slider label texts
+    document.getElementById('attVal').textContent = att + '%';
+    document.getElementById('ct1Val').textContent = ct1;
+    document.getElementById('ct2Val').textContent = ct2;
+    document.getElementById('mpVal').textContent = mp;
+    document.getElementById('eseVal').textContent = ese + ' / 70';
+    document.getElementById('backlogVal').textContent = backlogs;
+    document.getElementById('pastVal').textContent = past + '%';
+
+    // Calculate PA = ((CT1 + CT2) / 2) + MP
+    const pa = ((ct1 + ct2) / 2) + mp;
+    document.getElementById('paTotalBadge').textContent = pa.toFixed(1) + ' / 30';
+    document.getElementById('paCalcLabel').textContent = `(${ct1} + ${ct2})/2 + ${mp} = ${pa.toFixed(1)}`;
+
+    // Total Subject Score = PA + ESE
+    const total = pa + ese;
+    document.getElementById('totalMarksScore').textContent = total.toFixed(1) + ' / 100';
+    document.getElementById('totalPctLabel').textContent = total.toFixed(1) + '% Obtained';
+
+    // Pass / Fail (Subject Passing Criteria: >= 40 total, and >= 28 in ESE)
+    const passFailEl = document.getElementById('passFailBadge');
+    if (total >= 40 && ese >= 28) {
+        passFailEl.textContent = 'PASS';
+        passFailEl.className = 'fs-4 fw-bold text-success';
+    } else {
+        passFailEl.textContent = 'FAIL';
+        passFailEl.className = 'fs-4 fw-bold text-danger';
+    }
+
+    // Internal marks percentage for ML model = (PA / 30) * 100
+    const internalPct = (pa / 30.0) * 100.0;
+
+    // ATKT simulation status
+    const atktBadge = document.getElementById('atktBadge');
+    const atktMsg = document.getElementById('atktMsg');
+    if (backlogs === 0) {
+        atktBadge.className = 'badge bg-success rounded-pill px-3 py-1';
+        atktBadge.textContent = 'Clear Pass';
+        atktMsg.textContent = 'Eligible for Final Diploma Award without pending backlogs.';
+    } else if (backlogs <= 3) {
+        atktBadge.className = 'badge bg-warning text-dark rounded-pill px-3 py-1';
+        atktBadge.textContent = `ATKT (${backlogs} Backlog${backlogs > 1 ? 's' : ''})`;
+        atktMsg.textContent = 'Eligible for Term Progression under MSBTE ATKT rules (<= 3 heads).';
+    } else {
+        atktBadge.className = 'badge bg-danger rounded-pill px-3 py-1';
+        atktBadge.textContent = `Year Down (${backlogs} Backlogs)`;
+        atktMsg.textContent = 'Not eligible for term progression due to > 3 uncleared heads of passing.';
+    }
+
+    // Fetch Real-time ML Prediction
+    fetch('/prediction/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            attendance: att,
+            internal: internalPct,
+            previous: past,
+            assignment: 75.0,
+            failed_subjects: backlogs
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const pred = data.data;
+            const badge = document.getElementById('predCatBadge');
+            badge.textContent = pred.predicted_category;
+            badge.className = `badge bg-${pred.badge_class} fs-6 rounded-pill px-3 py-1`;
+            document.getElementById('predSummary').textContent = pred.summary;
+            
+            const list = document.getElementById('predRecList');
+            list.innerHTML = '';
+            pred.recommendations.forEach(r => {
+                const li = document.createElement('li');
+                li.textContent = r;
+                list.appendChild(li);
+            });
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function resetSimulator() {
+    document.getElementById('attSlider').value = 78;
+    document.getElementById('ct1Slider').value = 16;
+    document.getElementById('ct2Slider').value = 17;
+    document.getElementById('mpSlider').value = 8;
+    document.getElementById('eseSlider').value = 48;
+    document.getElementById('backlogSlider').value = 0;
+    document.getElementById('pastSlider').value = 72;
+    updateSim();
+}
+
+document.addEventListener('DOMContentLoaded', updateSim);
+</script>
+{% endblock %}

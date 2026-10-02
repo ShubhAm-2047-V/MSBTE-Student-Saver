@@ -1,0 +1,93 @@
+{
+    "model_type": "Decision Tree Classifier",
+    "criterion": "gini",
+    "max_depth": 4,
+    "features": [
+        "attendance_percentage",
+        "internal_percentage",
+        "previous_percentage",
+        "assignment_percentage",
+        "failed_subjects"
+    ],
+    "classes": [
+        "At Risk",
+        "Average",
+        "Good",
+        "Needs Improvement"
+    ],
+    "train_samples": 280,
+    "test_samples": 70,
+    "accuracy": 78.57,
+    "feature_importances": {
+        "attendance_percentage": 11.78,
+        "internal_percentage": 36.33,
+        "previous_percentage": 6.44,
+        "assignment_percentage": 18.96,
+        "failed_subjects": 26.49
+    },
+    "confusion_matrix": [
+        [
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            0,
+            21,
+            9,
+            2
+        ],
+        [
+            0,
+            2,
+            26,
+            0
+        ],
+        [
+            0,
+            1,
+            0,
+            8
+        ]
+    ],
+    "classification_report": {
+        "At Risk": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 1.0
+        },
+        "Average": {
+            "precision": 0.875,
+            "recall": 0.65625,
+            "f1-score": 0.75,
+            "support": 32.0
+        },
+        "Good": {
+            "precision": 0.7428571428571429,
+            "recall": 0.9285714285714286,
+            "f1-score": 0.8253968253968254,
+            "support": 28.0
+        },
+        "Needs Improvement": {
+            "precision": 0.7272727272727273,
+            "recall": 0.8888888888888888,
+            "f1-score": 0.8,
+            "support": 9.0
+        },
+        "accuracy": 0.7857142857142857,
+        "macro avg": {
+            "precision": 0.5862824675324676,
+            "recall": 0.6184275793650793,
+            "f1-score": 0.5938492063492063,
+            "support": 70.0
+        },
+        "weighted avg": {
+            "precision": 0.7906493506493506,
+            "recall": 0.7857142857142857,
+            "f1-score": 0.7758730158730159,
+            "support": 70.0
+        }
+    }
+}

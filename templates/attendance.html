@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Module | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="attendance-wrapper">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom gap-2">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-calendar-check text-cyan me-2"></i>Attendance Module
+            </h3>
+            <p class="text-muted small mb-0">Record and monitor subject-wise attendance to detect students below MSBTE's 75% threshold.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="dropdown">
+                <button class="btn btn-outline-info dropdown-toggle shadow-sm px-3" type="button" data-bs-toggle="dropdown">
+                    <i class="fa-solid fa-file-export me-1"></i> Export Attendance
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('reports.print_attendance_ledger') }}" target="_blank">
+                            <i class="fa-solid fa-file-pdf text-danger me-2"></i> Print Attendance Ledger (PDF)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('reports.export_attendance_excel') }}">
+                            <i class="fa-solid fa-file-excel text-success me-2"></i> Export to Excel (.xlsx)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('reports.export_attendance_csv') }}">
+                            <i class="fa-solid fa-file-csv text-primary me-2"></i> Export to CSV
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <a href="{{ url_for('admin.defaulters_list') }}" class="btn btn-danger shadow-sm">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i> View Defaulters (< 75%)
+            </a>
+        </div>
+    </div>
+
+    <!-- Attendance Entry Card -->
+    <div class="card-clean p-4 mb-4">
+        <h5 class="fw-bold text-dark mb-3">
+            <i class="fa-solid fa-calendar-plus text-primary me-2"></i>Record Student Attendance
+        </h5>
+
+        <form method="POST" action="{{ url_for('attendance.add_attendance') }}" id="attForm">
+            <div class="row g-3">
+                <!-- Select Student -->
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-dark">Select Student <span class="text-danger">*</span></label>
+                    <select class="form-select" name="student_id" required>
+                        <option value="">-- Choose Enrolled Student --</option>
+                        {% for s in students %}
+                        <option value="{{ s.id }}" {% if selected_student == s.id %}selected{% endif %}>
+                            {{ s.enrollment_no }} - {{ s.name }} (Sem {{ s.semester }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Select Subject -->
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-dark">Select Subject <span class="text-danger">*</span></label>
+                    <select class="form-select" name="subject_id" required>
+                        <option value="">-- Choose Subject --</option>
+                        {% for subj in subjects %}
+                        <option value="{{ subj.id }}" {% if selected_subject == subj.id %}selected{% endif %}>
+                            [{{ subj.subject_code }}] {{ subj.subject_name }} (Sem {{ subj.semester }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Total Classes Conducted -->
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-dark">Total Classes Conducted <span class="text-danger">*</span></label>
+                    <input type="number" min="1" max="200" class="form-control" name="total_classes" id="totalClasses" value="50" required>
+                </div>
+
+                <!-- Attended Classes -->
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-dark">Classes Attended <span class="text-danger">*</span></label>
+                    <input type="number" min="0" max="200" class="form-control" name="attended_classes" id="attendedClasses" value="40" required>
+                </div>
+
+                <div class="col-12 d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Save Attendance Record
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Attendance History Table -->
+    <div class="card-clean overflow-hidden mb-4">
+        <div class="p-3 bg-white border-bottom d-flex align-items-center justify-content-between">
+            <span class="fw-bold text-dark fs-6">
+                <i class="fa-solid fa-clipboard-list me-2 text-primary"></i>
+                Recorded Attendance Logs <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill ms-2 px-3">{{ attendance_list|length }} Records</span>
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Student</th>
+                        <th>Subject</th>
+                        <th class="text-center">Total Conducted</th>
+                        <th class="text-center">Attended</th>
+                        <th class="text-center">Attendance %</th>
+                        <th class="text-center">Attendance Status</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if attendance_list %}
+                        {% for a in attendance_list %}
+                        {% set s = a.student %}
+                        <tr>
+                            <td class="ps-4">
+                                {% if s %}
+                                <div class="fw-bold text-dark cursor-pointer d-flex align-items-center gap-1" 
+                                     role="button" 
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#studentAttModal{{ s.id }}" 
+                                     title="Click to view all subjects attendance for {{ s.name }}">
+                                    <span>{{ s.name }}</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-primary" style="font-size: 0.72rem; opacity: 0.7;"></i>
+                                </div>
+                                <small class="text-muted font-monospace">{{ s.enrollment_no }}</small>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">{{ a.subject.subject_name if a.subject else '-' }}</div>
+                                <small class="text-muted font-monospace">[{{ a.subject.subject_code if a.subject else '' }}] Sem {{ a.subject.semester if a.subject else '' }}</small>
+                            </td>
+                            <td class="text-center font-monospace">{{ a.total_classes }}</td>
+                            <td class="text-center font-monospace fw-bold text-success">{{ a.attended_classes }}</td>
+                            <td class="text-center">
+                                {% if s %}
+                                <span class="fw-bold cursor-pointer {% if a.attendance_percentage >= 75 %}text-success{% elif a.attendance_percentage >= 60 %}text-warning{% else %}text-danger{% endif %}" 
+                                      style="font-size: 0.95rem;"
+                                      role="button" 
+                                      data-bs-toggle="modal" 
+                                      data-bs-target="#studentAttModal{{ s.id }}" 
+                                      title="Click to view overall & all subjects attendance for {{ s.name }}">
+                                    {{ a.attendance_percentage }}%
+                                </span>
+                                {% else %}
+                                <span class="fw-bold">{{ a.attendance_percentage }}%</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if s %}
+                                    {% if a.status == 'Good' %}
+                                        <span class="badge-pill badge-pill-success cursor-pointer" 
+                                              role="button" 
+                                              data-bs-toggle="modal" 
+                                              data-bs-target="#studentAttModal{{ s.id }}" 
+                                              title="Click to view overall & all subjects attendance for {{ s.name }}">
+                                            <i class="fa-solid fa-check"></i> Good (&ge;75%)
+                                        </span>
+                                    {% elif a.status == 'Needs Attention' %}
+                                        <span class="badge-pill badge-pill-warning cursor-pointer" 
+                                              role="button" 
+                                              data-bs-toggle="modal" 
+                                              data-bs-target="#studentAttModal{{ s.id }}" 
+                                              title="Click to view overall & all subjects attendance for {{ s.name }}">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> Attention (60-74%)
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-pill badge-pill-danger cursor-pointer" 
+                                              role="button" 
+                                              data-bs-toggle="modal" 
+                                              data-bs-target="#studentAttModal{{ s.id }}" 
+                                              title="Click to view overall & all subjects attendance for {{ s.name }}">
+                                            <i class="fa-solid fa-circle-exclamation"></i> Low (&lt;60%)
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge-pill badge-pill-secondary">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <form method="POST" action="{{ url_for('attendance.delete_attendance', id=a.id) }}" class="d-inline" onsubmit="return confirm('Delete this attendance entry?');">
+                                    <button type="submit" class="btn btn-outline-danger btn-icon" title="Delete Entry">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">No attendance records found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ALL-SUBJECTS & OVERALL ATTENDANCE MODALS PER STUDENT    -->
+    <!-- ======================================================= -->
+    {% if students %}
+        {% for s in students %}
+        {% set overall_att = s.calculate_overall_attendance() %}
+        {% set att_records = s.attendances.all() %}
+        {% set total_cond = att_records|sum(attribute='total_classes') if att_records else 0 %}
+        {% set total_att = att_records|sum(attribute='attended_classes') if att_records else 0 %}
+        {% set total_miss = total_cond - total_att if total_cond > total_att else 0 %}
+
+        <div class="modal fade" id="studentAttModal{{ s.id }}" tabindex="-1" aria-labelledby="studentAttModalLabel{{ s.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                <div class="modal-content text-start rounded-4 border-0 shadow-lg overflow-hidden">
+                    
+                    <!-- Modal Header -->
+                    <div class="modal-header {% if overall_att >= 75 %}bg-success text-white{% elif overall_att >= 60 %}bg-warning text-dark{% else %}bg-danger text-white{% endif %} p-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                                 style="width: 50px; height: 50px; font-size: 1.3rem; background: rgba(255,255,255,0.25);">
+                                {{ s.name[:1] }}
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold mb-0" id="studentAttModalLabel{{ s.id }}">
+                                    {{ s.name }}
+                                </h5>
+                                <div class="small opacity-75 font-monospace">
+                                    {{ s.enrollment_no }} &bull; {{ s.branch }} (Sem {{ s.semester }})
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close {% if overall_att >= 75 or overall_att < 60 %}btn-close-white{% endif %}" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="modal-body p-4">
+                        
+                        <!-- 1. Overall Attendance Hero Card -->
+                        <div class="card-clean p-3 mb-4 bg-light border">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                                <div>
+                                    <span class="text-uppercase small fw-bold text-muted letter-spacing">Overall Aggregate Attendance</span>
+                                    <div class="d-flex align-items-baseline gap-2 mt-1">
+                                        <h2 class="fw-bold mb-0 {% if overall_att >= 75 %}text-success{% elif overall_att >= 60 %}text-warning{% else %}text-danger{% endif %}" style="font-family: 'Outfit', sans-serif;">
+                                            {{ overall_att }}%
+                                        </h2>
+                                        <span class="badge {% if overall_att >= 75 %}bg-success text-white{% elif overall_att >= 60 %}bg-warning text-dark{% else %}bg-danger text-white{% endif %} rounded-pill px-3 py-1">
+                                            {% if overall_att >= 75 %}
+                                                <i class="fa-solid fa-circle-check me-1"></i> MSBTE Compliant (≥75%)
+                                            {% elif overall_att >= 60 %}
+                                                <i class="fa-solid fa-triangle-exclamation me-1"></i> Undertaking Required (60-74%)
+                                            {% else %}
+                                                <i class="fa-solid fa-ban me-1"></i> Critical Defaulter (<60%)
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Progress Bar -->
+                                <div style="min-width: 200px; flex: 1; max-width: 260px;">
+                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                        <span>Target: 75%</span>
+                                        <span>Current: {{ overall_att }}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; border-radius: 8px;">
+                                        <div class="progress-bar {% if overall_att >= 75 %}bg-success{% elif overall_att >= 60 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                             role="progressbar" 
+                                             style="width: {{ overall_att }}%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3 Quick KPI Counters -->
+                            <div class="row g-2 mt-3 pt-3 border-top text-center">
+                                <div class="col-4">
+                                    <div class="p-2 bg-white rounded-3 border">
+                                        <small class="text-muted d-block" style="font-size: 0.72rem;">Total Conducted</small>
+                                        <strong class="text-dark fs-6 font-monospace">{{ total_cond }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2 bg-white rounded-3 border">
+                                        <small class="text-muted d-block" style="font-size: 0.72rem;">Total Attended</small>
+                                        <strong class="text-success fs-6 font-monospace">{{ total_att }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2 bg-white rounded-3 border">
+                                        <small class="text-muted d-block" style="font-size: 0.72rem;">Classes Missed</small>
+                                        <strong class="{% if total_miss > 15 %}text-danger{% elif total_miss > 0 %}text-warning{% else %}text-success{% endif %} fs-6 font-monospace">
+                                            {{ total_miss }}
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. All Subject Attendance Breakdown Table -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold text-dark mb-0">
+                                    <i class="fa-solid fa-list-check text-primary me-2"></i>Subject-Wise Attendance Breakdown
+                                </h6>
+                                <span class="badge bg-light text-muted border rounded-pill small px-3">
+                                    {{ att_records|length }} Subject{{ 's' if att_records|length != 1 else '' }} Recorded
+                                </span>
+                            </div>
+
+                            {% if att_records %}
+                            <div class="table-responsive rounded-3 border">
+                                <table class="table table-hover table-sm align-middle mb-0" style="font-size: 0.85rem;">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-3 py-2">Subject Name & Code</th>
+                                            <th class="text-center py-2">Conducted</th>
+                                            <th class="text-center py-2">Attended</th>
+                                            <th class="text-center py-2">Missed</th>
+                                            <th class="text-center py-2">Attendance %</th>
+                                            <th class="text-center py-2 pe-3">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for rec in att_records %}
+                                        {% set missed = rec.total_classes - rec.attended_classes %}
+                                        <tr>
+                                            <td class="ps-3 py-2">
+                                                <div class="fw-semibold text-dark">{{ rec.subject.subject_name if rec.subject else '-' }}</div>
+                                                <small class="text-muted font-monospace">Code: {{ rec.subject.subject_code if rec.subject else '' }} (Sem {{ rec.subject.semester if rec.subject else '' }})</small>
+                                            </td>
+                                            <td class="text-center font-monospace">{{ rec.total_classes }}</td>
+                                            <td class="text-center font-monospace fw-bold text-success">{{ rec.attended_classes }}</td>
+                                            <td class="text-center font-monospace {% if missed > 10 %}text-danger fw-bold{% elif missed > 0 %}text-warning{% else %}text-muted{% endif %}">
+                                                {{ missed }}
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="fw-bold {% if rec.attendance_percentage >= 75 %}text-success{% elif rec.attendance_percentage >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                                                    {{ rec.attendance_percentage }}%
+                                                </span>
+                                            </td>
+                                            <td class="text-center pe-3">
+                                                {% if rec.status == 'Good' %}
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">
+                                                        <i class="fa-solid fa-check"></i> Good
+                                                    </span>
+                                                {% elif rec.status == 'Needs Attention' %}
+                                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2">
+                                                        <i class="fa-solid fa-triangle-exclamation"></i> Warning
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2">
+                                                        <i class="fa-solid fa-circle-exclamation"></i> Critical
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="p-4 text-center bg-light rounded-3 text-muted">
+                                <i class="fa-regular fa-folder-open fs-3 mb-2 d-block text-secondary"></i>
+                                No subject attendance records logged yet for this student.
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- 3. Student Quick Academic & Contact Info -->
+                        <div class="row g-2 text-muted small mt-2">
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded-2 border">
+                                    <i class="fa-solid fa-envelope text-primary me-1"></i> Email: <strong>{{ s.email or 'Not Provided' }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 bg-light rounded-2 border">
+                                    <i class="fa-solid fa-phone text-success me-1"></i> Parent Contact: <strong>{{ s.phone or 'Not Provided' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer bg-light border-top d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if s.phone %}
+                            <a href="https://wa.me/91{{ s.phone }}?text=Respected%20Parent,%20this%20is%20to%20inform%20you%20that%20the%20overall%20attendance%20for%20{{ s.name }}%20({{ s.enrollment_no }})%20is%20{{ overall_att }}%%20which%20is%20below%20MSBTE%20norms.%20Please%20contact%20the%20department." 
+                               target="_blank" 
+                               class="btn btn-outline-success btn-sm rounded-pill px-3 shadow-sm">
+                                <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp Parent
+                            </a>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('reports.student_report', id=s.id) }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                <i class="fa-solid fa-print me-1"></i> Print PDF Report
+                            </a>
+                            <a href="{{ url_for('admin.student_detail', id=s.id) }}" class="btn btn-primary btn-sm rounded-pill px-3">
+                                <i class="fa-solid fa-user-graduate me-1"></i> View Full Profile
+                            </a>
+                            <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+{% endblock %}

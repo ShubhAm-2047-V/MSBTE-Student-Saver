@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Power BI Integration & Data Exports | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="powerbi-wrapper">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom gap-2">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-chart-pie text-warning me-2"></i>Power BI Integration & Excel/CSV Exports
+            </h3>
+            <p class="text-muted small mb-0">Download structured data for advanced dashboards in Microsoft Power BI or Excel.</p>
+        </div>
+    </div>
+
+    <!-- Simple Main Banner -->
+    <div class="card-clean p-4 mb-4 bg-primary text-white border-0">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-warning text-dark fw-bold mb-2">Ready for Microsoft Power BI</span>
+                <h4 class="fw-bold text-white mb-2">Export Complete Master Dataset for Power BI</h4>
+                <p class="text-white-50 small mb-0">
+                    Click the download button to get a cleaned, all-in-one spreadsheet containing student marks, attendance percentages, and ML prediction categories.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <a href="{{ url_for('reports.export_powerbi_master_csv') }}" class="btn btn-warning btn-lg text-dark fw-bold shadow">
+                    <i class="fa-solid fa-file-arrow-down me-1"></i> Download Power BI Master CSV
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual Export Cards -->
+    <div class="row g-3 mb-4">
+        <!-- 1. Students -->
+        <div class="col-md-4">
+            <div class="card-clean p-3 text-center h-100">
+                <div class="text-primary fs-2 mb-2"><i class="fa-solid fa-users"></i></div>
+                <h6 class="fw-bold text-dark mb-1">1. Students Directory</h6>
+                <p class="text-muted small mb-3">All registered students ({{ student_count }} records)</p>
+                <div class="d-flex justify-content-center gap-2 mt-auto">
+                    <a href="{{ url_for('reports.export_students_excel') }}" class="btn btn-outline-success btn-sm">
+                        <i class="fa-solid fa-file-excel"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{{ url_for('reports.export_students_csv') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fa-solid fa-file-csv"></i> CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Marks -->
+        <div class="col-md-4">
+            <div class="card-clean p-3 text-center h-100">
+                <div class="text-success fs-2 mb-2"><i class="fa-solid fa-pen-ruler"></i></div>
+                <h6 class="fw-bold text-dark mb-1">2. Marks Dataset</h6>
+                <p class="text-muted small mb-3">Internal, external & total marks ({{ marks_count }} records)</p>
+                <div class="d-flex justify-content-center gap-2 mt-auto">
+                    <a href="{{ url_for('reports.export_marks_excel') }}" class="btn btn-outline-success btn-sm">
+                        <i class="fa-solid fa-file-excel"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{{ url_for('reports.export_marks_csv') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fa-solid fa-file-csv"></i> CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Attendance -->
+        <div class="col-md-4">
+            <div class="card-clean p-3 text-center h-100">
+                <div class="text-info fs-2 mb-2"><i class="fa-solid fa-calendar-check"></i></div>
+                <h6 class="fw-bold text-dark mb-1">3. Attendance Records</h6>
+                <p class="text-muted small mb-3">Conducted and attended classes ({{ attendance_count }} records)</p>
+                <div class="d-flex justify-content-center gap-2 mt-auto">
+                    <a href="{{ url_for('reports.export_attendance_excel') }}" class="btn btn-outline-success btn-sm">
+                        <i class="fa-solid fa-file-excel"></i> Excel (.xlsx)
+                    </a>
+                    <a href="{{ url_for('reports.export_attendance_csv') }}" class="btn btn-outline-info btn-sm">
+                        <i class="fa-solid fa-file-csv"></i> CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple 3-Step Power BI Import Guide -->
+    <div class="card-clean p-4 mb-4">
+        <h5 class="fw-bold text-dark mb-3">
+            <i class="fa-solid fa-circle-question text-primary me-2"></i>How to Import this into Microsoft Power BI (3 Easy Steps)
+        </h5>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <div class="badge bg-primary text-white mb-2">Step 1</div>
+                    <h6 class="fw-bold text-dark">Download CSV</h6>
+                    <p class="small text-muted mb-0">Click the <strong>Download Power BI Master CSV</strong> button above to save the data file to your computer.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <div class="badge bg-primary text-white mb-2">Step 2</div>
+                    <h6 class="fw-bold text-dark">Open Power BI Desktop</h6>
+                    <p class="small text-muted mb-0">In Power BI Desktop, click <strong>Get Data &rarr; Text/CSV</strong>, select the downloaded file, and click <strong>Load</strong>.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <div class="badge bg-primary text-white mb-2">Step 3</div>
+                    <h6 class="fw-bold text-dark">Create Visuals</h6>
+                    <p class="small text-muted mb-0">Drag and drop fields like <strong>Attendance %</strong> or <strong>Marks %</strong> into Bar Charts and Donut Charts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

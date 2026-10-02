@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Subject | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="fw-bold text-dark mb-0 font-outfit">
+                    <i class="fa-solid fa-book-bookmark text-warning me-2"></i>
+                    {{ action }} Subject Configuration
+                </h5>
+                <a href="{{ url_for('admin.subjects_list') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row g-3">
+                        <!-- Subject Code -->
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Subject Code <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control font-monospace" name="subject_code" 
+                                   value="{{ subject.subject_code if subject else '' }}" 
+                                   placeholder="e.g. 22516" 
+                                   {% if action == 'Edit' %}readonly{% endif %} required>
+                        </div>
+
+                        <!-- Subject Name -->
+                        <div class="col-md-8">
+                            <label class="form-label small fw-semibold">Subject Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="subject_name" 
+                                   value="{{ subject.subject_name if subject else '' }}" 
+                                   placeholder="e.g. Operating Systems" required>
+                        </div>
+
+                        <!-- Branch -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Branch <span class="text-danger">*</span></label>
+                            <select class="form-select" name="branch" required>
+                                <option value="Computer Engineering" {% if subject and subject.branch == 'Computer Engineering' %}selected{% endif %}>Computer Engineering</option>
+                                <option value="Information Technology" {% if subject and subject.branch == 'Information Technology' %}selected{% endif %}>Information Technology</option>
+                                <option value="Electronics & Telecommunication" {% if subject and subject.branch == 'Electronics & Telecommunication' %}selected{% endif %}>Electronics & Telecommunication</option>
+                            </select>
+                        </div>
+
+                        <!-- Semester -->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Semester <span class="text-danger">*</span></label>
+                            <select class="form-select" name="semester" required>
+                                {% for s in [1, 2, 3, 4, 5, 6] %}
+                                <option value="{{ s }}" {% if subject and subject.semester == s %}selected{% elif not subject and s == 5 %}selected{% endif %}>Semester {{ s }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Subject Type -->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Subject Type <span class="text-danger">*</span></label>
+                            <select class="form-select" name="subject_type" required>
+                                <option value="Theory" {% if subject and subject.subject_type == 'Theory' %}selected{% endif %}>Theory</option>
+                                <option value="Theory + Practical" {% if subject and subject.subject_type == 'Theory + Practical' %}selected{% endif %}>Theory + Practical</option>
+                                <option value="Practical/Lab" {% if subject and subject.subject_type == 'Practical/Lab' %}selected{% endif %}>Practical/Lab</option>
+                                <option value="Project" {% if subject and subject.subject_type == 'Project' %}selected{% endif %}>Project</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12"><hr class="my-2 text-muted"></div>
+                        <div class="col-12"><h6 class="fw-bold text-primary mb-1">Marks Scheme & Credits</h6></div>
+
+                        <!-- Internal Max -->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Internal Max</label>
+                            <input type="number" step="any" class="form-control" name="internal_max" 
+                                   value="{{ subject.internal_max if subject else 30.0 }}" required>
+                        </div>
+
+                        <!-- External Max -->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">External Max</label>
+                            <input type="number" step="any" class="form-control" name="external_max" 
+                                   value="{{ subject.external_max if subject else 70.0 }}" required>
+                        </div>
+
+                        <!-- Practical Max -->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Practical Max</label>
+                            <input type="number" step="any" class="form-control" name="practical_max" 
+                                   value="{{ subject.practical_max if subject else 0.0 }}" required>
+                        </div>
+
+                        <!-- Total Max -->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Total Max</label>
+                            <input type="number" step="any" class="form-control" name="total_max" 
+                                   value="{{ subject.total_max if subject else 100.0 }}" required>
+                        </div>
+
+                        <!-- Passing Marks -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Passing Marks <span class="text-danger">*</span></label>
+                            <input type="number" step="any" class="form-control" name="passing_marks" 
+                                   value="{{ subject.passing_marks if subject else 40.0 }}" required>
+                        </div>
+
+                        <!-- Credits -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Subject Credits</label>
+                            <input type="number" class="form-control" name="credits" 
+                                   value="{{ subject.credits if subject else 4 }}" required>
+                        </div>
+
+                        <div class="col-12 mt-4 d-flex justify-content-end gap-2">
+                            <a href="{{ url_for('admin.subjects_list') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-warning px-4 fw-semibold text-dark">
+                                <i class="fa-solid fa-check me-1"></i> Save Subject
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

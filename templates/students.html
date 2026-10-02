@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+
+{% block title %}Student Management | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="students-wrapper">
+    <!-- Page Header Card -->
+    <div class="card-clean p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-primary-subtle text-primary fw-bold font-monospace px-3 py-1 rounded-pill">
+                        Student Directory
+                    </span>
+                    <span class="badge bg-light text-muted border rounded-pill">
+                        {{ student_rows|length }} Total Enrolled
+                    </span>
+                </div>
+                <h3 class="fw-bold text-dark mb-1" style="font-family: 'Outfit', sans-serif;">Student Academic Management</h3>
+                <p class="text-muted small mb-0">Search, filter, and review performance indicators for diploma students.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle shadow-sm px-3" type="button" data-bs-toggle="dropdown">
+                        <i class="fa-solid fa-file-export me-1"></i> Export Records
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('reports.print_students_directory') }}" target="_blank">
+                                <i class="fa-solid fa-file-pdf text-danger me-2"></i> Print Directory (PDF)
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('reports.export_students_excel') }}">
+                                <i class="fa-solid fa-file-excel text-success me-2"></i> Export to Excel (.xlsx)
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('reports.export_students_csv') }}">
+                                <i class="fa-solid fa-file-csv text-primary me-2"></i> Export to CSV
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <a href="{{ url_for('admin.student_add') }}" class="btn btn-primary shadow-sm px-4">
+                    <i class="fa-solid fa-user-plus me-1"></i> Add New Student
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar Card -->
+    <div class="card-clean p-3 mb-4">
+        <form method="GET" action="{{ url_for('admin.students_list') }}" class="row g-2 align-items-center">
+            <!-- Search Input -->
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0 ps-0" name="search" value="{{ search }}" placeholder="Search by student name or enrollment number...">
+                </div>
+            </div>
+
+            <!-- Branch Filter -->
+            <div class="col-6 col-md-3">
+                <select class="form-select" name="branch">
+                    <option value="">All Branches / Depts</option>
+                    {% for b in branches %}
+                        <option value="{{ b }}" {% if selected_branch == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Semester Filter -->
+            <div class="col-6 col-md-2">
+                <select class="form-select" name="semester">
+                    <option value="">All Semesters</option>
+                    {% for s in semesters %}
+                        <option value="{{ s }}" {% if selected_semester == s|string %}selected{% endif %}>Semester {{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fa-solid fa-filter"></i> Filter
+                </button>
+                <a href="{{ url_for('admin.students_list') }}" class="btn btn-outline-secondary" title="Reset Filters">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Structured Modern Students Table -->
+    <div class="card-clean overflow-hidden mb-4">
+        <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+            <span class="fw-bold text-dark" style="font-size: 0.95rem;">
+                <i class="fa-solid fa-table-list me-2 text-primary"></i>
+                Enrolled Students Table
+            </span>
+            <span class="badge bg-white text-dark border rounded-pill px-3 py-1 small">
+                Showing {{ student_rows|length }} Records
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 13%; min-width: 125px;">Enrollment No</th>
+                        <th style="width: 22%; min-width: 180px;">Student Name</th>
+                        <th style="width: 15%; min-width: 140px;">Branch</th>
+                        <th class="text-center" style="width: 8%; min-width: 75px;">Semester</th>
+                        <th class="text-center" style="width: 10%; min-width: 85px;">Percentage</th>
+                        <th class="text-center" style="width: 10%; min-width: 85px;">Attendance</th>
+                        <th style="width: 12%; min-width: 130px;">Performance Tier</th>
+                        <th class="text-end pe-4" style="width: 10%; min-width: 115px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if student_rows %}
+                        {% for row in student_rows %}
+                        {% set s = row.student %}
+                        <tr>
+                            <td class="ps-4">
+                                <a href="{{ url_for('admin.student_detail', id=s.id) }}" class="font-monospace fw-bold text-primary text-decoration-none">
+                                    {{ s.enrollment_no }}
+                                </a>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ s.name }}</div>
+                                <small class="text-muted">{{ s.email or 'No email' }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ s.branch }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2">Sem {{ s.semester }}</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="fw-bold {% if row.percentage >= 75 %}text-success{% elif row.percentage >= 60 %}text-info{% elif row.percentage >= 40 %}text-warning{% else %}text-danger{% endif %}" style="font-size: 0.95rem;">
+                                    {{ row.percentage }}%
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    <span class="fw-bold {% if row.attendance >= 75 %}text-success{% elif row.attendance >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                                        {{ row.attendance }}%
+                                    </span>
+                                    {% if row.attendance < 75 %}
+                                        <i class="fa-solid fa-triangle-exclamation text-warning" title="Attendance is below 75%"></i>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-inline-flex flex-column align-items-center gap-1">
+                                    {% if row.category == 'Excellent' %}
+                                        <span class="badge-pill badge-pill-success" role="button" data-bs-toggle="modal" data-bs-target="#academicModal{{ s.id }}" title="Click to view academic & subject details">
+                                            <i class="fa-solid fa-circle-check"></i> Excellent
+                                        </span>
+                                    {% elif row.category == 'Good' %}
+                                        <span class="badge-pill badge-pill-primary" role="button" data-bs-toggle="modal" data-bs-target="#academicModal{{ s.id }}" title="Click to view academic & subject details">
+                                            <i class="fa-solid fa-circle-check"></i> Good
+                                        </span>
+                                    {% elif row.category == 'Average' %}
+                                        <span class="badge-pill badge-pill-info" role="button" data-bs-toggle="modal" data-bs-target="#academicModal{{ s.id }}" title="Click to view academic & subject details">
+                                            <i class="fa-solid fa-info-circle"></i> Average
+                                        </span>
+                                    {% elif row.category == 'Needs Improvement' %}
+                                        <span class="badge-pill badge-pill-warning" role="button" data-bs-toggle="modal" data-bs-target="#academicModal{{ s.id }}" title="Click to view academic & subject details">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> Needs Imp.
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-pill badge-pill-danger" role="button" data-bs-toggle="modal" data-bs-target="#academicModal{{ s.id }}" title="Click to view academic & subject details">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> At Risk
+                                        </span>
+                                    {% endif %}
+
+                                    {% if row.failed_count > 0 %}
+                                        <span class="badge-backlog" role="button" data-bs-toggle="modal" data-bs-target="#academicModal{{ s.id }}" title="Click to view backlog subject details">
+                                            <i class="fa-solid fa-circle-exclamation"></i> {{ row.failed_count }} {% if row.failed_count == 1 %}Backlog{% else %}Backlogs{% endif %}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-inline-flex align-items-center justify-content-end gap-1">
+                                    <a href="{{ url_for('admin.student_detail', id=s.id) }}" class="btn btn-outline-primary btn-icon" title="View Profile">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('admin.student_edit', id=s.id) }}" class="btn btn-outline-secondary btn-icon" title="Edit Student">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger btn-icon" data-bs-toggle="modal" data-bs-target="#deleteModal{{ s.id }}" title="Delete Student">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-inbox fs-2 text-secondary mb-2 d-block"></i>
+                                No student records found matching your filters.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modals defined outside table container to avoid CSS transform / stacking context trapping -->
+    {% if student_rows %}
+        {% for row in student_rows %}
+        {% set s = row.student %}
+        <!-- Student Quick Academic & Backlogs Modal -->
+        <div class="modal fade" id="academicModal{{ s.id }}" tabindex="-1" aria-labelledby="academicModalLabel{{ s.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content text-start rounded-4 border-0 shadow-lg overflow-hidden">
+                    <!-- Modal Header -->
+                    <div class="modal-header {% if row.failed_count > 0 %}bg-danger text-white{% else %}bg-primary text-white{% endif %} p-3 px-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid {% if row.failed_count > 0 %}fa-triangle-exclamation{% else %}fa-graduation-cap{% endif %} fs-5"></i>
+                            <div>
+                                <h5 class="modal-title fs-6 fw-bold mb-0 text-white" id="academicModalLabel{{ s.id }}">{{ s.name }}</h5>
+                                <small class="text-white-50 font-monospace">{{ s.enrollment_no }} &bull; {{ s.branch }} (Sem {{ s.semester }})</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="modal-body p-4">
+                        <!-- Top Quick Stats -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 bg-light rounded-3 border text-center">
+                                    <div class="text-muted small fw-bold text-uppercase">Score</div>
+                                    <div class="fs-5 fw-bold {% if row.percentage >= 75 %}text-success{% elif row.percentage >= 60 %}text-primary{% elif row.percentage >= 40 %}text-warning{% else %}text-danger{% endif %}">
+                                        {{ row.percentage }}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 bg-light rounded-3 border text-center">
+                                    <div class="text-muted small fw-bold text-uppercase">Attendance</div>
+                                    <div class="fs-5 fw-bold {% if row.attendance >= 75 %}text-success{% elif row.attendance >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                                        {{ row.attendance }}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 bg-light rounded-3 border text-center">
+                                    <div class="text-muted small fw-bold text-uppercase">Performance</div>
+                                    <div class="fs-6 fw-bold mt-1 text-dark">{{ row.category }}</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 bg-light rounded-3 border text-center">
+                                    <div class="text-muted small fw-bold text-uppercase">Active Backlogs</div>
+                                    <div class="fs-5 fw-bold {% if row.failed_count > 0 %}text-danger{% else %}text-success{% endif %}">
+                                        {{ row.failed_count }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Backlogs Section -->
+                        {% if row.failed_count > 0 %}
+                            <div class="alert alert-danger d-flex align-items-center gap-2 mb-3 rounded-3 py-2 px-3">
+                                <i class="fa-solid fa-circle-exclamation fs-5 text-danger"></i>
+                                <div class="small fw-semibold">
+                                    This student has <strong>{{ row.failed_count }} active backlog subject(s)</strong> that do not meet MSBTE passing criteria.
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold text-danger mb-2 small text-uppercase letter-spacing-1">
+                                <i class="fa-solid fa-list-check me-1"></i> Uncleared Backlog Subjects Breakdown
+                            </h6>
+                            <div class="table-responsive mb-4 rounded-3 border overflow-hidden">
+                                <table class="table table-sm table-hover mb-0 align-middle">
+                                    <thead class="table-danger small">
+                                        <tr>
+                                            <th class="ps-3">Code</th>
+                                            <th>Subject Name</th>
+                                            <th class="text-center">Int (Max)</th>
+                                            <th class="text-center">Ext (Max)</th>
+                                            <th class="text-center">Total Scored</th>
+                                            <th class="text-center">Passing Required</th>
+                                            <th class="text-end pe-3">Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        {% for fm in row.failed_marks %}
+                                        <tr>
+                                            <td class="ps-3 font-monospace fw-bold text-danger">{{ fm.subject.subject_code if fm.subject else '-' }}</td>
+                                            <td class="fw-semibold text-dark">{{ fm.subject.subject_name if fm.subject else 'Subject' }}</td>
+                                            <td class="text-center">{{ fm.internal_marks }} / {{ fm.subject.internal_max if fm.subject else 30 }}</td>
+                                            <td class="text-center">{{ fm.external_marks }} / {{ fm.subject.external_max if fm.subject else 70 }}</td>
+                                            <td class="text-center fw-bold text-danger">{{ fm.total_marks }} / {{ fm.subject.total_max if fm.subject else 100 }}</td>
+                                            <td class="text-center fw-bold text-dark">{{ fm.subject.passing_marks if fm.subject else 40 }}</td>
+                                            <td class="text-end pe-3">
+                                                <span class="badge bg-danger rounded-pill px-2 py-1"><i class="fa-solid fa-xmark me-1"></i>Fail</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success d-flex align-items-center gap-2 mb-4 rounded-3 py-2 px-3">
+                                <i class="fa-solid fa-circle-check fs-5 text-success"></i>
+                                <div class="small fw-semibold">
+                                    Clean Academic Record: All registered course subjects have been cleared with passing marks.
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- All Registered Subjects Quick Overview -->
+                        <h6 class="fw-bold text-dark mb-2 small text-uppercase letter-spacing-1">
+                            <i class="fa-solid fa-book-open me-1 text-primary"></i> All Semester {{ s.semester }} Subjects ({{ row.all_marks|length }} Records)
+                        </h6>
+                        <div class="table-responsive rounded-3 border overflow-hidden">
+                            <table class="table table-sm table-hover mb-0 align-middle">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th class="ps-3">Code</th>
+                                        <th>Subject Name</th>
+                                        <th class="text-center">Total Marks</th>
+                                        <th class="text-center">Percentage</th>
+                                        <th class="text-end pe-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="small">
+                                    {% for m in row.all_marks %}
+                                    <tr>
+                                        <td class="ps-3 font-monospace text-primary fw-bold">{{ m.subject.subject_code if m.subject else '-' }}</td>
+                                        <td class="text-dark">{{ m.subject.subject_name if m.subject else '-' }}</td>
+                                        <td class="text-center fw-bold">{{ m.total_marks }} / {{ m.subject.total_max if m.subject else 100 }}</td>
+                                        <td class="text-center">{{ m.percentage }}%</td>
+                                        <td class="text-end pe-3">
+                                            {% if m.result == 'Pass' %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">Pass</span>
+                                            {% else %}
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2">Backlog</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="5" class="text-center py-3 text-muted">No marks recorded yet for this student.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer bg-light border-top p-3 px-4 d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('reports.student_report', id=s.id) }}" target="_blank" class="btn btn-outline-danger btn-sm">
+                                <i class="fa-solid fa-file-pdf me-1"></i> Print PDF Report
+                            </a>
+                            <a href="{{ url_for('admin.student_detail', id=s.id) }}" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-id-badge me-1"></i> Full Academic Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal{{ s.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ s.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-start rounded-4 border-0 shadow">
+                    <div class="modal-header bg-danger text-white rounded-top-4">
+                        <h5 class="modal-title fs-6 fw-bold text-white" id="deleteModalLabel{{ s.id }}">
+                            <i class="fa-solid fa-triangle-exclamation me-2"></i>Confirm Delete
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        Are you sure you want to delete student <strong>{{ s.name }} ({{ s.enrollment_no }})</strong>?
+                        <div class="alert alert-warning mt-3 small mb-0 rounded-3">
+                            <i class="fa-solid fa-circle-exclamation me-1"></i> All associated marks and attendance records will be permanently removed.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <form method="POST" action="{{ url_for('admin.student_delete', id=s.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Yes, Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

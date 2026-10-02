@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}MSBTE Capstone Projects & ATKT Portal | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="capstone-wrapper">
+    <!-- Header Card -->
+    <div class="card-clean p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-warning-subtle text-warning-emphasis fw-bold font-monospace px-3 py-1 rounded-pill">
+                        MSBTE Course: 22058 / 22059
+                    </span>
+                    <span class="badge bg-light text-muted border rounded-pill">
+                        3rd Year Capstone & ATKT Audit
+                    </span>
+                </div>
+                <h3 class="fw-bold text-dark mb-1" style="font-family: 'Outfit', sans-serif;">
+                    <i class="fa-solid fa-graduation-cap text-warning me-2"></i>Capstone Project Planning & ATKT Eligibility Portal
+                </h3>
+                <p class="text-muted small mb-0">Track 3rd-year diploma project groups, guide allocation, weekly logbook reviews, and board ATKT eligibility.</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-warning text-dark fw-bold shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                    <i class="fa-solid fa-plus me-1"></i> Register New Project Group
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 ATKT & Capstone Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="kpi-card-modern kpi-success border-accent-success">
+                <div class="kpi-icon-box"><i class="fa-solid fa-circle-check"></i></div>
+                <div>
+                    <div class="kpi-val">{{ atkt_clear }}</div>
+                    <div class="kpi-title">All Cleared (0 Backlogs)</div>
+                    <small class="text-success fw-semibold" style="font-size: 0.72rem;">Eligible for Final Diploma</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="kpi-card-modern kpi-warning border-accent-warning">
+                <div class="kpi-icon-box"><i class="fa-solid fa-file-circle-check"></i></div>
+                <div>
+                    <div class="kpi-val">{{ atkt_eligible }}</div>
+                    <div class="kpi-title">ATKT Allowed (&le; 3 Backlogs)</div>
+                    <small class="text-warning fw-semibold" style="font-size: 0.72rem;">Eligible to Keep Term</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="kpi-card-modern kpi-danger border-accent-danger">
+                <div class="kpi-icon-box"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div>
+                    <div class="kpi-val">{{ atkt_yeardown }}</div>
+                    <div class="kpi-title">Year Down (> 3 Backlogs)</div>
+                    <small class="text-danger fw-semibold" style="font-size: 0.72rem;">Term Retention Required</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="kpi-card-modern kpi-primary border-accent-primary">
+                <div class="kpi-icon-box"><i class="fa-solid fa-diagram-project"></i></div>
+                <div>
+                    <div class="kpi-val">{{ projects|length }}</div>
+                    <div class="kpi-title">Capstone Project Groups</div>
+                    <small class="text-muted" style="font-size: 0.72rem;">Active 3rd Year Batches</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Capstone Projects Table -->
+    <div class="card-clean overflow-hidden mb-4">
+        <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+            <span class="fw-bold text-dark fs-6">
+                <i class="fa-solid fa-list-check text-primary me-2"></i>
+                Registered Capstone Groups (Course 22058 / 22059)
+            </span>
+            <span class="badge bg-white text-dark border rounded-pill px-3 py-1 small">
+                {{ projects|length }} Groups Listed
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 10%;">Group No</th>
+                        <th style="width: 25%;">Project Title & Domain</th>
+                        <th style="width: 18%;">Guide Faculty</th>
+                        <th style="width: 22%;">Team Members</th>
+                        <th class="text-center" style="width: 12%;">Project Status</th>
+                        <th class="text-center" style="width: 10%;">Weekly Diary</th>
+                        <th class="text-end pe-4" style="width: 5%;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in projects %}
+                    <tr>
+                        <td class="ps-4 font-monospace fw-bold text-primary">{{ p.group_no }}</td>
+                        <td>
+                            <div class="fw-bold text-dark">{{ p.project_title }}</div>
+                            <span class="badge bg-light text-muted border mt-1">{{ p.domain }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark"><i class="fa-solid fa-chalkboard-user text-primary me-1"></i>{{ p.guide_name }}</div>
+                            <small class="text-muted">Semester {{ p.semester }}</small>
+                        </td>
+                        <td>
+                            <div class="small text-muted">{{ p.members }}</div>
+                        </td>
+                        <td class="text-center">
+                            {% if p.status == 'Ready for Viva' %}
+                                <span class="badge-pill badge-pill-success"><i class="fa-solid fa-circle-check"></i> Ready for Viva</span>
+                            {% elif p.status == 'In Progress' %}
+                                <span class="badge-pill badge-pill-primary"><i class="fa-solid fa-spinner"></i> In Progress</span>
+                            {% else %}
+                                <span class="badge-pill badge-pill-warning"><i class="fa-solid fa-file-lines"></i> Synopsis Approved</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if p.weekly_diary_status == 'Up to Date' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">Up to Date</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2">Pending Log</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <form method="POST" action="{{ url_for('admin.capstone_delete', id=p.id) }}" class="d-inline" onsubmit="return confirm('Delete capstone group {{ p.group_no }}?');">
+                                <button type="submit" class="btn btn-outline-danger btn-icon" title="Delete Group">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Capstone Group Modal -->
+    <div class="modal fade" id="addProjectModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content text-start rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-warning text-dark rounded-top-4">
+                    <h5 class="modal-title fs-6 fw-bold">
+                        <i class="fa-solid fa-diagram-project me-2"></i>Register New Capstone Project Group
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('admin.capstone_projects') }}">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Group No <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="group_no" placeholder="e.g. GRP-05" required>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold text-dark">Project Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="project_title" placeholder="e.g. AI-Powered Smart Exam Proctoring System" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Domain</label>
+                                <input type="text" class="form-control" name="domain" value="AI / Web Application" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Guide Faculty Name</label>
+                                <input type="text" class="form-control" name="guide_name" value="Prof. A. S. Kulkarni" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-dark">Group Members (Names & Enrollments)</label>
+                                <textarea class="form-control" name="members" rows="2" placeholder="e.g. Student 1 (2300520010), Student 2 (2300520011)"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Project Status</label>
+                                <select class="form-select" name="status">
+                                    <option value="Synopsis Approved">Synopsis Approved</option>
+                                    <option value="In Progress" selected>In Progress</option>
+                                    <option value="Ready for Viva">Ready for Viva</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Weekly Diary / Log Status</label>
+                                <select class="form-select" name="weekly_diary_status">
+                                    <option value="Up to Date" selected>Up to Date</option>
+                                    <option value="Pending Review">Pending Review</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-top">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning fw-bold text-dark btn-sm">Save Project Group</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

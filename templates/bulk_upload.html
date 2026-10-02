@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk CSV Data Upload | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="bulk-upload-wrapper">
+    <!-- Header Card -->
+    <div class="card-clean p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-primary-subtle text-primary fw-bold font-monospace px-3 py-1 rounded-pill">
+                        Batch Data Import
+                    </span>
+                    <span class="badge bg-light text-muted border rounded-pill">
+                        CSV & Excel Format
+                    </span>
+                </div>
+                <h3 class="fw-bold text-dark mb-1" style="font-family: 'Outfit', sans-serif;">
+                    <i class="fa-solid fa-cloud-arrow-up text-primary me-2"></i>Bulk Students & Marks Importer
+                </h3>
+                <p class="text-muted small mb-0">Upload entire student batches or subject marksheets using standardized CSV templates.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions & Templates Card -->
+    <div class="row g-4 mb-4">
+        <!-- 1. Student Bulk Upload Card -->
+        <div class="col-lg-6">
+            <div class="card-clean p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fa-solid fa-users text-primary me-2"></i>1. Bulk Enroll Students
+                    </h5>
+                    <a href="{{ url_for('admin.download_student_template') }}" class="btn btn-outline-primary btn-sm rounded-pill">
+                        <i class="fa-solid fa-download me-1"></i> Sample CSV
+                    </a>
+                </div>
+
+                <p class="text-muted small mb-3">
+                    Upload a CSV file containing new students. If an enrollment number already exists, student details will be updated automatically.
+                </p>
+
+                <div class="p-3 bg-light rounded-3 border mb-3 small font-monospace">
+                    <strong>Required Columns:</strong><br>
+                    <code>Enrollment_No, Student_Name, Branch, Semester, Academic_Year, Email, Phone, Previous_Percentage</code>
+                </div>
+
+                <form method="POST" action="{{ url_for('admin.bulk_upload') }}" enctype="multipart/form-data">
+                    <input type="hidden" name="upload_type" value="students">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Select Students CSV File:</label>
+                        <input type="file" class="form-control" name="file" accept=".csv" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                        <i class="fa-solid fa-upload me-1"></i> Upload & Import Students
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. Marks Bulk Upload Card -->
+        <div class="col-lg-6">
+            <div class="card-clean p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fa-solid fa-marker text-success me-2"></i>2. Bulk Upload Subject Marks
+                    </h5>
+                    <a href="{{ url_for('admin.download_marks_template') }}" class="btn btn-outline-success btn-sm rounded-pill">
+                        <i class="fa-solid fa-download me-1"></i> Sample CSV
+                    </a>
+                </div>
+
+                <p class="text-muted small mb-3">
+                    Upload internal/external marks for multiple students in batch. The system automatically calculates total marks, percentage, and Pass/Fail result.
+                </p>
+
+                <div class="p-3 bg-light rounded-3 border mb-3 small font-monospace">
+                    <strong>Required Columns:</strong><br>
+                    <code>Enrollment_No, Subject_Code, Internal_Marks, External_Marks, Practical_Marks</code>
+                </div>
+
+                <form method="POST" action="{{ url_for('admin.bulk_upload') }}" enctype="multipart/form-data">
+                    <input type="hidden" name="upload_type" value="marks">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Select Marks CSV File:</label>
+                        <input type="file" class="form-control" name="file" accept=".csv" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 shadow-sm">
+                        <i class="fa-solid fa-upload me-1"></i> Upload & Record Marks
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

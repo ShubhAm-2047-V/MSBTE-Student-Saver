@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}MSBTE Subject Management | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="subjects-wrapper">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom gap-2">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-book-bookmark text-warning me-2"></i>MSBTE Subject Management
+            </h3>
+            <p class="text-muted small mb-0">Configurable curriculum structure for MSBTE Diploma branches and semesters.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="dropdown">
+                <button class="btn btn-outline-warning dropdown-toggle shadow-sm px-3 text-dark" type="button" data-bs-toggle="dropdown">
+                    <i class="fa-solid fa-file-export me-1"></i> Export Curriculum
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('reports.export_subjects_excel') }}">
+                            <i class="fa-solid fa-file-excel text-success me-2"></i> Export to Excel (.xlsx)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('reports.export_subjects_csv') }}">
+                            <i class="fa-solid fa-file-csv text-primary me-2"></i> Export to CSV
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <a href="{{ url_for('admin.subject_add') }}" class="btn btn-warning text-dark fw-bold shadow-sm">
+                <i class="fa-solid fa-plus"></i> Add New Subject
+            </a>
+        </div>
+    </div>
+
+    <!-- MSBTE Academic Structure Banner -->
+    <div class="card-clean p-4 mb-4 border-start border-warning border-4 bg-light">
+        <div class="d-flex align-items-start gap-3">
+            <div class="text-warning fs-2 mt-1">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold text-dark mb-1 fs-6">Demo MSBTE Academic Structure (Configurable)</h6>
+                <p class="text-muted small mb-0">
+                    This system supports flexible academic curriculum schemes. The administrator can dynamically configure subject codes, maximum internal/external/practical marks, passing thresholds, and credit weightages.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subjects Table -->
+    <div class="card-clean overflow-hidden mb-4">
+        <div class="p-3 bg-white border-bottom d-flex align-items-center justify-content-between">
+            <span class="fw-bold text-dark fs-6">
+                <i class="fa-solid fa-list-check me-2 text-primary"></i>
+                Configured Course Subjects <span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-pill ms-2 px-3">{{ subjects|length }} Subjects</span>
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Code</th>
+                        <th>Subject Name</th>
+                        <th>Branch</th>
+                        <th>Sem</th>
+                        <th>Type</th>
+                        <th class="text-center">Int Max</th>
+                        <th class="text-center">Ext Max</th>
+                        <th class="text-center">Prac Max</th>
+                        <th class="text-center">Total Max</th>
+                        <th class="text-center">Pass Marks</th>
+                        <th class="text-center">Credits</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if subjects %}
+                        {% for subj in subjects %}
+                        <tr>
+                            <td class="ps-4 font-monospace fw-bold text-primary">{{ subj.subject_code }}</td>
+                            <td class="fw-bold text-dark">{{ subj.subject_name }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ subj.branch }}</span></td>
+                            <td><span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2">Sem {{ subj.semester }}</span></td>
+                            <td><span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2">{{ subj.subject_type }}</span></td>
+                            <td class="text-center">{{ subj.internal_max }}</td>
+                            <td class="text-center">{{ subj.external_max }}</td>
+                            <td class="text-center">{{ subj.practical_max }}</td>
+                            <td class="text-center fw-bold">{{ subj.total_max }}</td>
+                            <td class="text-center text-success fw-bold">{{ subj.passing_marks }}</td>
+                            <td class="text-center"><span class="badge bg-light text-dark border">{{ subj.credits }}</span></td>
+                            <td class="text-end pe-4">
+                                <div class="d-inline-flex align-items-center justify-content-end gap-1">
+                                    <a href="{{ url_for('admin.subject_edit', id=subj.id) }}" class="btn btn-outline-secondary btn-icon" title="Edit Subject">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger btn-icon" data-bs-toggle="modal" data-bs-target="#deleteSubjModal{{ subj.id }}" title="Delete Subject">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="12" class="text-center py-5 text-muted">No subjects configured. Click "Add New Subject" to create one.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modals rendered outside table -->
+    {% if subjects %}
+        {% for subj in subjects %}
+        <div class="modal fade" id="deleteSubjModal{{ subj.id }}" tabindex="-1" aria-labelledby="deleteSubjLabel{{ subj.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-start rounded-4 border-0 shadow">
+                    <div class="modal-header bg-danger text-white rounded-top-4">
+                        <h5 class="modal-title fs-6 fw-bold text-white" id="deleteSubjLabel{{ subj.id }}"><i class="fa-solid fa-triangle-exclamation me-2"></i>Delete Subject</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        Are you sure you want to delete subject <strong>{{ subj.subject_name }} ({{ subj.subject_code }})</strong>?
+                        <div class="alert alert-warning mt-3 small mb-0 rounded-3">
+                            All associated marks and attendance records will be removed.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <form method="POST" action="{{ url_for('admin.subject_delete', id=subj.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Yes, Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

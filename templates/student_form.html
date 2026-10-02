@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Student | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="fw-bold text-dark mb-0 font-outfit">
+                    <i class="fa-solid fa-user-{% if action == 'Add' %}plus{% else %}pen{% endif %} text-primary me-2"></i>
+                    {{ action }} Student Record
+                </h5>
+                <a href="{{ url_for('admin.students_list') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row g-3">
+                        <!-- Enrollment No -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Enrollment Number <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="enrollment_no" 
+                                   value="{{ student.enrollment_no if student else '' }}" 
+                                   placeholder="e.g. 2300520001" 
+                                   {% if action == 'Edit' %}readonly{% endif %} required>
+                            <small class="text-muted" style="font-size: 0.72rem;">Unique MSBTE Diploma Enrollment No</small>
+                        </div>
+
+                        <!-- Student Name -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Student Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="name" 
+                                   value="{{ student.name if student else '' }}" 
+                                   placeholder="e.g. Aarav Patil" required>
+                        </div>
+
+                        <!-- Branch -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Branch / Department <span class="text-danger">*</span></label>
+                            <select class="form-select" name="branch" required>
+                                <option value="Computer Engineering" {% if student and student.branch == 'Computer Engineering' %}selected{% endif %}>Computer Engineering</option>
+                                <option value="Information Technology" {% if student and student.branch == 'Information Technology' %}selected{% endif %}>Information Technology</option>
+                                <option value="Electronics & Telecommunication" {% if student and student.branch == 'Electronics & Telecommunication' %}selected{% endif %}>Electronics & Telecommunication</option>
+                                <option value="Mechanical Engineering" {% if student and student.branch == 'Mechanical Engineering' %}selected{% endif %}>Mechanical Engineering</option>
+                                <option value="Civil Engineering" {% if student and student.branch == 'Civil Engineering' %}selected{% endif %}>Civil Engineering</option>
+                            </select>
+                        </div>
+
+                        <!-- Semester -->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Semester <span class="text-danger">*</span></label>
+                            <select class="form-select" name="semester" required>
+                                {% for sem in [1, 2, 3, 4, 5, 6] %}
+                                <option value="{{ sem }}" {% if student and student.semester == sem %}selected{% elif not student and sem == 5 %}selected{% endif %}>Semester {{ sem }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Academic Year -->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Academic Year</label>
+                            <input type="text" class="form-control" name="academic_year" 
+                                   value="{{ student.academic_year if student else '2025-2026' }}" placeholder="2025-2026">
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Email Address</label>
+                            <input type="email" class="form-control" name="email" 
+                                   value="{{ student.email if student else '' }}" placeholder="student@example.com">
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Contact Phone</label>
+                            <input type="text" class="form-control" name="phone" 
+                                   value="{{ student.phone if student else '' }}" placeholder="9876543210">
+                        </div>
+
+                        <div class="col-12"><hr class="my-2 text-muted"></div>
+                        <div class="col-12"><h6 class="fw-bold text-primary mb-1">Baseline Academic Metrics (for ML & Analytics)</h6></div>
+
+                        <!-- Previous Percentage -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Previous Semester %</label>
+                            <div class="input-group">
+                                <input type="number" step="any" min="0" max="100" class="form-control" name="previous_percentage" 
+                                       value="{{ student.previous_percentage if student else '70.0' }}" placeholder="70.0">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Assignment Percentage -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Assignment / Lab Work %</label>
+                            <div class="input-group">
+                                <input type="number" step="any" min="0" max="100" class="form-control" name="assignment_percentage" 
+                                       value="{{ student.assignment_percentage if student else '75.0' }}" placeholder="75.0">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4 d-flex justify-content-end gap-2">
+                            <a href="{{ url_for('admin.students_list') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                                <i class="fa-solid fa-check me-1"></i> Save Student
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}ML Early Warning Predictor | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="prediction-wrapper">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom gap-2 animate-fade-in">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-brain text-danger me-2"></i>Student Performance Prediction & Early Warning Studio
+            </h3>
+            <p class="text-muted small mb-0">Interactive Machine Learning Decision Tree model to detect at-risk students before MSBTE examinations.</p>
+        </div>
+        <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 fw-semibold rounded-pill shadow-sm">
+            <i class="fa-solid fa-microchip me-1"></i> DecisionTreeClassifier
+        </span>
+    </div>
+
+    <!-- Friendly Notice Banner -->
+    <div class="alert alert-warning border-0 p-3 rounded-4 d-flex align-items-center gap-3 mb-4 shadow-sm animate-fade-in">
+        <i class="fa-solid fa-triangle-exclamation fs-3 text-warning"></i>
+        <div class="small">
+            <strong>Academic Demonstration Notice:</strong> This machine learning model is an educational early warning tool designed for diploma students and faculty. It does not predict official MSBTE board awards.
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Input Form Column -->
+        <div class="col-lg-6">
+            <div class="card-clean p-4 h-100 shadow-sm">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="fa-solid fa-sliders text-primary me-2"></i>1. Configure Academic Indicators
+                </h5>
+
+                <!-- Autofill Dropdown -->
+                <div class="p-3 bg-light rounded-3 border mb-4">
+                    <label class="form-label small fw-bold text-primary mb-1">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Quick Autofill from Registered Student:
+                    </label>
+                    <select class="form-select" id="autoStudentSelect">
+                        <option value="">-- Choose an enrolled student to auto-populate --</option>
+                        {% for s in students %}
+                        <option value="{{ s.id }}"
+                                data-att="{{ s.calculate_overall_attendance() }}"
+                                data-int="{{ s.calculate_internal_percentage() }}"
+                                data-prev="{{ s.previous_percentage or 70.0 }}"
+                                data-assign="{{ s.assignment_percentage or 75.0 }}"
+                                data-fails="{{ s.get_failed_subjects_count() }}">
+                            {{ s.enrollment_no }} - {{ s.name }} (Sem {{ s.semester }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <form method="POST" action="{{ url_for('prediction.predict_page') }}">
+                    <div class="row g-3">
+                        <!-- Attendance -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Attendance % (Norm: &ge;75%)</label>
+                            <div class="input-group">
+                                <input type="number" step="any" min="0" max="100" class="form-control" name="attendance" id="inputAtt" value="{{ form_data.attendance }}" required>
+                                <span class="input-group-text bg-light">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Internal Marks -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Internal Marks % (Unit Tests)</label>
+                            <div class="input-group">
+                                <input type="number" step="any" min="0" max="100" class="form-control" name="internal" id="inputInt" value="{{ form_data.internal }}" required>
+                                <span class="input-group-text bg-light">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Previous Semester -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Previous Semester %</label>
+                            <div class="input-group">
+                                <input type="number" step="any" min="0" max="100" class="form-control" name="previous" id="inputPrev" value="{{ form_data.previous }}" required>
+                                <span class="input-group-text bg-light">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Assignment / Lab Score -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Assignment / Lab Work %</label>
+                            <div class="input-group">
+                                <input type="number" step="any" min="0" max="100" class="form-control" name="assignment" id="inputAssign" value="{{ form_data.assignment }}" required>
+                                <span class="input-group-text bg-light">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Backlogs -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark">Number of Uncleared Backlogs / Failed Subjects</label>
+                            <input type="number" min="0" max="10" class="form-control" name="failed_subjects" id="inputFails" value="{{ form_data.failed_subjects }}" required>
+                            <small class="text-muted" style="font-size: 0.75rem;">Enter 0 if all subjects are currently cleared</small>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-danger w-100 py-3 fs-6 shadow-md fw-bold">
+                                <i class="fa-solid fa-bolt me-2"></i> Run Machine Learning Prediction
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Prediction Result Column with Dramatic Reveal Animation -->
+        <div class="col-lg-6">
+            <div class="card-clean p-4 h-100 d-flex flex-column justify-content-center shadow-sm">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="fa-solid fa-square-poll-vertical text-success me-2"></i>2. Real-Time Prediction Output
+                </h5>
+
+                {% if prediction_result %}
+                    <div class="text-center p-4 rounded-4 border mb-3 animate-pop-in" 
+                         style="background: {% if prediction_result.badge_class == 'success' %}var(--success-light){% elif prediction_result.badge_class == 'danger' %}var(--danger-light){% elif prediction_result.badge_class == 'warning' %}var(--warning-light){% else %}var(--primary-light){% endif %};">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Predicted Performance Category</small>
+                        <span class="badge bg-{{ prediction_result.badge_class }} fs-3 px-4 py-2 my-2 rounded-pill shadow-sm" style="animation: pulseGlow 2.5s infinite;">
+                            {{ prediction_result.predicted_category }}
+                        </span>
+                        <div class="fw-bold text-dark mt-2">
+                            Risk Level: <strong class="text-{{ prediction_result.badge_class }}">{{ prediction_result.risk_level }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 animate-fade-in animate-delay-1">
+                        <h6 class="fw-bold text-dark small mb-1">Assessment Analysis:</h6>
+                        <p class="text-muted small mb-0">{{ prediction_result.summary }}</p>
+                    </div>
+
+                    <div class="mb-3 animate-fade-in animate-delay-2">
+                        <h6 class="fw-bold text-dark small mb-2">Actionable Academic Interventions:</h6>
+                        <ul class="list-group list-group-flush small">
+                            {% for rec in prediction_result.recommendations %}
+                            <li class="list-group-item px-0 py-1 bg-transparent d-flex align-items-start gap-2">
+                                <i class="fa-solid fa-circle-check text-{{ prediction_result.badge_class }} mt-1"></i>
+                                <span class="fw-medium">{{ rec }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Category Probabilities -->
+                    <div class="animate-fade-in animate-delay-3">
+                        <h6 class="fw-bold text-dark small mb-2">Class Confidence Distribution:</h6>
+                        {% for cat_name, prob in prediction_result.confidence_distribution.items() %}
+                        <div class="d-flex align-items-center gap-2 mb-1 small">
+                            <span style="width: 120px;" class="fw-bold text-truncate">{{ cat_name }}:</span>
+                            <div class="progress flex-grow-1" style="height: 10px;">
+                                <div class="progress-bar {% if cat_name == 'Good' %}bg-primary{% elif cat_name == 'Average' %}bg-info{% elif cat_name == 'Needs Improvement' %}bg-warning{% else %}bg-danger{% endif %}" 
+                                     style="width: {{ prob }}%;"></div>
+                            </div>
+                            <span style="width: 45px;" class="text-end fw-bold text-muted">{{ prob }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <div class="d-inline-flex p-4 rounded-circle bg-light mb-3" style="animation: floatIcon 4s ease-in-out infinite;">
+                            <i class="fa-solid fa-robot fs-1 text-secondary"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark">Ready to Predict</h5>
+                        <p class="small text-muted mb-0">Select an existing student or customize the inputs on the left to trigger the Decision Tree model.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Viva Transparency Section -->
+    <div class="card-clean p-4 mb-4 shadow-sm animate-fade-in animate-delay-2">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+            <h5 class="fw-bold text-dark mb-0">
+                <i class="fa-solid fa-chalkboard-user text-primary me-2"></i>How Decision Tree Works (Viva Explanation)
+            </h5>
+            <span class="badge bg-success-subtle text-success border border-success fw-bold rounded-pill px-3 py-2">
+                Real Test Accuracy: {{ metadata.accuracy }}%
+            </span>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded-4 border h-100">
+                    <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-diagram-project me-1"></i> 1. Flowchart Structure</h6>
+                    <p class="small text-muted mb-0">
+                        A Decision Tree makes predictions like a flowchart of logical questions: <em>"Is attendance &ge; 75%? If Yes &rarr; evaluate marks. If No &rarr; check backlog count."</em>
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded-4 border h-100">
+                    <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-sliders me-1"></i> 2. Top Deciding Features</h6>
+                    <p class="small text-muted mb-0">
+                        The model prioritizes <strong>Attendance %</strong> and <strong>Internal Marks</strong> as the strongest predictors of diploma semester success.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded-4 border h-100">
+                    <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-shield me-1"></i> 3. Viva Defense Value</h6>
+                    <p class="small text-muted mb-0">
+                        Unlike "black-box" neural networks, every split threshold can be printed, verified, and defended in front of diploma external examiners.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const studentSelect = document.getElementById('autoStudentSelect');
+    const inputAtt = document.getElementById('inputAtt');
+    const inputInt = document.getElementById('inputInt');
+    const inputPrev = document.getElementById('inputPrev');
+    const inputAssign = document.getElementById('inputAssign');
+    const inputFails = document.getElementById('inputFails');
+
+    if (studentSelect) {
+        studentSelect.addEventListener('change', function() {
+            const opt = studentSelect.options[studentSelect.selectedIndex];
+            if (opt && opt.value) {
+                inputAtt.value = opt.dataset.att;
+                inputInt.value = opt.dataset.int;
+                inputPrev.value = opt.dataset.prev;
+                inputAssign.value = opt.dataset.assign;
+                inputFails.value = opt.dataset.fails;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

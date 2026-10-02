@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}MSBTE Attendance Defaulters & Parent Alerts | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="defaulters-wrapper">
+    <!-- Header -->
+    <div class="card-clean p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-danger-subtle text-danger fw-bold font-monospace px-3 py-1 rounded-pill">
+                        MSBTE Rule 14 Compliance
+                    </span>
+                    <span class="badge bg-light text-muted border rounded-pill">
+                        {{ total_defaulters }} Total Defaulters (< 75%)
+                    </span>
+                </div>
+                <h3 class="fw-bold text-dark mb-1" style="font-family: 'Outfit', sans-serif;">
+                    Monthly Attendance Defaulters & Parent Notice Generator
+                </h3>
+                <p class="text-muted small mb-0">Identify students below MSBTE's 75% threshold, send WhatsApp/SMS parent intimations, and print official notices.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <!-- Universal Export Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle shadow-sm px-3" type="button" data-bs-toggle="dropdown">
+                        <i class="fa-solid fa-file-export me-1"></i> Export Data
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('reports.print_defaulters_notice') }}" target="_blank">
+                                <i class="fa-solid fa-file-pdf text-danger me-2"></i> Print Official Notice (PDF)
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('reports.export_defaulters_excel') }}">
+                                <i class="fa-solid fa-file-excel text-success me-2"></i> Export to Excel (.xlsx)
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('reports.export_defaulters_csv') }}">
+                                <i class="fa-solid fa-file-csv text-primary me-2"></i> Export to CSV
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <a href="{{ url_for('reports.print_defaulters_notice') }}" target="_blank" class="btn btn-danger shadow-sm px-4">
+                    <i class="fa-solid fa-print me-1"></i> Print Board Notice
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3 Quick Defaulter Metric Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="kpi-card-modern kpi-danger border-accent-danger">
+                <div class="kpi-icon-box"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div>
+                    <div class="kpi-val">{{ critical_count }}</div>
+                    <div class="kpi-title">Critical Detention (< 60%)</div>
+                    <small class="text-danger fw-semibold" style="font-size: 0.72rem;">Liable for Exam Form Barring</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="kpi-card-modern kpi-warning border-accent-warning">
+                <div class="kpi-icon-box"><i class="fa-solid fa-file-signature"></i></div>
+                <div>
+                    <div class="kpi-val">{{ warning_count }}</div>
+                    <div class="kpi-title">Undertaking Required (60-74%)</div>
+                    <small class="text-warning fw-semibold" style="font-size: 0.72rem;">Parent Meeting Mandatory</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="kpi-card-modern kpi-info border-accent-info">
+                <div class="kpi-icon-box"><i class="fa-solid fa-users"></i></div>
+                <div>
+                    <div class="kpi-val">{{ total_defaulters }}</div>
+                    <div class="kpi-title">Total Defaulters Listed</div>
+                    <small class="text-muted" style="font-size: 0.72rem;">MSBTE 75% Criteria Unmet</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card-clean p-3 mb-4">
+        <form method="GET" action="{{ url_for('admin.defaulters_list') }}" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <select class="form-select" name="threshold">
+                    <option value="all" {% if selected_threshold == 'all' %}selected{% endif %}>All Defaulters (< 75%)</option>
+                    <option value="critical" {% if selected_threshold == 'critical' %}selected{% endif %}>Critical Only (< 60%)</option>
+                    <option value="warning" {% if selected_threshold == 'warning' %}selected{% endif %}>Undertaking Only (60-74%)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="branch">
+                    <option value="">All Branches</option>
+                    {% for b in branches %}
+                        <option value="{{ b }}" {% if selected_branch == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="semester">
+                    <option value="">All Semesters</option>
+                    {% for s in semesters %}
+                        <option value="{{ s }}" {% if selected_semester == s|string %}selected{% endif %}>Semester {{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-filter"></i> Filter</button>
+                <a href="{{ url_for('admin.defaulters_list') }}" class="btn btn-outline-secondary" title="Reset"><i class="fa-solid fa-rotate-left"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Defaulters Table -->
+    <div class="card-clean overflow-hidden mb-4">
+        <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+            <span class="fw-bold text-dark fs-6">
+                <i class="fa-solid fa-clipboard-user text-danger me-2"></i>
+                Identified Defaulters List
+            </span>
+            <span class="badge bg-white text-danger border border-danger-subtle rounded-pill px-3 py-1 small">
+                {{ defaulters|length }} Students Found
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 14%;">Enrollment No</th>
+                        <th style="width: 22%;">Student Name</th>
+                        <th style="width: 15%;">Branch</th>
+                        <th class="text-center" style="width: 8%;">Sem</th>
+                        <th class="text-center" style="width: 12%;">Attendance %</th>
+                        <th class="text-center" style="width: 11%;">Missed / Total</th>
+                        <th style="width: 10%;">Severity</th>
+                        <th class="text-end pe-4" style="width: 8%;">Parent Alert</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if defaulters %}
+                        {% for d in defaulters %}
+                        {% set s = d.student %}
+                        <tr>
+                            <td class="ps-4">
+                                <a href="{{ url_for('admin.student_detail', id=s.id) }}" class="font-monospace fw-bold text-danger text-decoration-none">
+                                    {{ s.enrollment_no }}
+                                </a>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ s.name }}</div>
+                                <small class="text-muted"><i class="fa-solid fa-phone me-1"></i>{{ s.phone or 'No phone' }}</small>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">{{ s.branch }}</span></td>
+                            <td class="text-center"><span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2">Sem {{ s.semester }}</span></td>
+                            <td class="text-center">
+                                <span class="fw-bold fs-6 text-danger">{{ d.attendance }}%</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="small fw-semibold text-danger">{{ d.missed }} Missed</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">of {{ d.conducted }} Conducted</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ d.badge_class }}-subtle text-{{ d.badge_class }} border border-{{ d.badge_class }}-subtle rounded-pill px-2 py-1" style="font-size: 0.72rem; font-weight: 700;">
+                                    {{ d.severity }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <button type="button" class="btn btn-outline-success btn-icon" data-bs-toggle="modal" data-bs-target="#alertModal{{ s.id }}" title="Send WhatsApp / Copy SMS Notice">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-success">
+                                <i class="fa-solid fa-circle-check fs-2 mb-2 d-block text-success"></i>
+                                Excellent! No students found below 75% attendance for the selected filters.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modals rendered outside table -->
+    {% if defaulters %}
+        {% for d in defaulters %}
+        {% set s = d.student %}
+        <div class="modal fade" id="alertModal{{ s.id }}" tabindex="-1" aria-labelledby="alertLabel{{ s.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-start rounded-4 border-0 shadow-lg">
+                    <div class="modal-header bg-success text-white rounded-top-4">
+                        <h5 class="modal-title fs-6 fw-bold text-white" id="alertLabel{{ s.id }}">
+                            <i class="fa-brands fa-whatsapp me-2"></i>Parent Attendance Notice
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                            <div>
+                                <h6 class="fw-bold text-dark mb-0">{{ s.name }}</h6>
+                                <small class="text-muted font-monospace">{{ s.enrollment_no }} &bull; Sem {{ s.semester }}</small>
+                            </div>
+                            <span class="badge bg-danger rounded-pill px-3 py-2">{{ d.attendance }}% Attendance</span>
+                        </div>
+
+                        <label class="form-label small fw-bold text-dark">Pre-Formatted Official Parent Message:</label>
+                        <textarea class="form-control mb-3 small bg-light font-monospace" rows="5" id="parentMsg{{ s.id }}" readonly>{{ d.parent_msg }}</textarea>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-primary w-50" onclick="copyMessage('parentMsg{{ s.id }}')">
+                                <i class="fa-solid fa-copy me-1"></i> Copy Message
+                            </button>
+                            <a href="https://api.whatsapp.com/send?text={{ d.parent_msg|urlencode }}" target="_blank" class="btn btn-success w-50">
+                                <i class="fa-brands fa-whatsapp me-1"></i> Open WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyMessage(textareaId) {
+    const copyText = document.getElementById(textareaId);
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    alert('Parent notification message copied to clipboard!');
+}
+</script>
+{% endblock %}

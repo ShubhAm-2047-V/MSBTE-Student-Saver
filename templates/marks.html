@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Marks Entry | MSBTE Student Saver{% endblock %}
+
+{% block content %}
+<div class="marks-wrapper">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom gap-2">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-pen-to-square text-success me-2"></i>Subject Marks Entry
+            </h3>
+            <p class="text-muted small mb-0">Record internal, external, and practical evaluation marks for students.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="dropdown">
+                <button class="btn btn-outline-success dropdown-toggle shadow-sm px-3" type="button" data-bs-toggle="dropdown">
+                    <i class="fa-solid fa-file-export me-1"></i> Export Marks
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('reports.print_marks_ledger') }}" target="_blank">
+                            <i class="fa-solid fa-file-pdf text-danger me-2"></i> Print Marks Ledger (PDF)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('reports.export_marks_excel') }}">
+                            <i class="fa-solid fa-file-excel text-success me-2"></i> Export to Excel (.xlsx)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('reports.export_marks_csv') }}">
+                            <i class="fa-solid fa-file-csv text-primary me-2"></i> Export to CSV
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <a href="{{ url_for('admin.bulk_upload') }}" class="btn btn-success shadow-sm">
+                <i class="fa-solid fa-cloud-arrow-up me-1"></i> Bulk Upload CSV
+            </a>
+        </div>
+    </div>
+
+    <!-- Marks Entry Form Card -->
+    <div class="card-clean p-4 mb-4">
+        <h5 class="fw-bold text-dark mb-3">
+            <i class="fa-solid fa-square-plus text-primary me-2"></i>Enter / Update Student Marks
+        </h5>
+
+        <form method="POST" action="{{ url_for('marks.add_marks') }}" id="marksForm">
+            <div class="row g-3">
+                <!-- Select Student -->
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-dark">Select Student <span class="text-danger">*</span></label>
+                    <select class="form-select" name="student_id" id="studentSelect" required>
+                        <option value="">-- Choose Enrolled Student --</option>
+                        {% for s in students %}
+                        <option value="{{ s.id }}" {% if selected_student == s.id %}selected{% endif %}>
+                            {{ s.enrollment_no }} - {{ s.name }} (Sem {{ s.semester }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Select Subject -->
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-dark">Select Subject <span class="text-danger">*</span></label>
+                    <select class="form-select" name="subject_id" id="subjectSelect" required>
+                        <option value="">-- Choose Subject --</option>
+                        {% for subj in subjects %}
+                        <option value="{{ subj.id }}" 
+                                data-int="{{ subj.internal_max }}" 
+                                data-ext="{{ subj.external_max }}" 
+                                data-prac="{{ subj.practical_max }}" 
+                                data-total="{{ subj.total_max }}" 
+                                data-pass="{{ subj.passing_marks }}"
+                                {% if selected_subject == subj.id %}selected{% endif %}>
+                            [{{ subj.subject_code }}] {{ subj.subject_name }} (Sem {{ subj.semester }} - Total Max: {{ subj.total_max }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Live Scheme Helper Alert -->
+                <div class="col-12" id="schemeInfo" style="display: none;">
+                    <div class="p-3 bg-light rounded-3 border d-flex flex-wrap gap-4 small align-items-center">
+                        <div><span class="text-muted">Internal Max:</span> <strong id="intMaxLabel" class="text-primary fs-6">30</strong></div>
+                        <div><span class="text-muted">External Max:</span> <strong id="extMaxLabel" class="text-primary fs-6">70</strong></div>
+                        <div><span class="text-muted">Practical Max:</span> <strong id="pracMaxLabel" class="text-primary fs-6">0</strong></div>
+                        <div><span class="text-muted">Total Max:</span> <strong id="totalMaxLabel" class="text-primary fs-6">100</strong></div>
+                        <div><span class="text-muted">Passing Marks:</span> <strong id="passMarksLabel" class="text-success fs-6">40</strong></div>
+                    </div>
+                </div>
+
+                <!-- Marks Input Fields -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-dark">Internal Marks</label>
+                    <input type="number" step="any" min="0" class="form-control" name="internal_marks" id="internalMarks" value="0" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-dark">External Marks</label>
+                    <input type="number" step="any" min="0" class="form-control" name="external_marks" id="externalMarks" value="0" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-dark">Practical Marks</label>
+                    <input type="number" step="any" min="0" class="form-control" name="practical_marks" id="practicalMarks" value="0" required>
+                </div>
+
+                <div class="col-12 d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-success px-4 py-2 shadow-sm">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Save Marks Entry
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Marks History Table -->
+    <div class="card-clean overflow-hidden mb-4">
+        <div class="p-3 bg-white border-bottom d-flex align-items-center justify-content-between">
+            <span class="fw-bold text-dark fs-6">
+                <i class="fa-solid fa-list-numeric me-2 text-primary"></i>
+                Recorded Subject Marks <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill ms-2 px-3">{{ marks_list|length }} Records</span>
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Student</th>
+                        <th>Subject</th>
+                        <th class="text-center">Internal</th>
+                        <th class="text-center">External</th>
+                        <th class="text-center">Practical</th>
+                        <th class="text-center">Total Marks</th>
+                        <th class="text-center">Percentage</th>
+                        <th class="text-center">Result</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if marks_list %}
+                        {% for m in marks_list %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">{{ m.student.name if m.student else '-' }}</div>
+                                <small class="text-muted font-monospace">{{ m.student.enrollment_no if m.student else '' }}</small>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">{{ m.subject.subject_name if m.subject else '-' }}</div>
+                                <small class="text-muted font-monospace">[{{ m.subject.subject_code if m.subject else '' }}] Sem {{ m.subject.semester if m.subject else '' }}</small>
+                            </td>
+                            <td class="text-center">{{ m.internal_marks }}</td>
+                            <td class="text-center">{{ m.external_marks }}</td>
+                            <td class="text-center">{{ m.practical_marks }}</td>
+                            <td class="text-center fw-bold">{{ m.total_marks }} / {{ m.subject.total_max if m.subject else 100 }}</td>
+                            <td class="text-center fw-semibold text-primary">{{ m.percentage }}%</td>
+                            <td class="text-center">
+                                {% if m.result == 'Pass' %}
+                                    <span class="badge-pill badge-pill-success"><i class="fa-solid fa-check"></i> Pass</span>
+                                {% else %}
+                                    <span class="badge-pill badge-pill-danger"><i class="fa-solid fa-xmark"></i> Fail</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <form method="POST" action="{{ url_for('marks.delete_marks', id=m.id) }}" class="d-inline" onsubmit="return confirm('Delete this marks entry?');">
+                                    <button type="submit" class="btn btn-outline-danger btn-icon" title="Delete Entry">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">No marks records found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const subjSelect = document.getElementById('subjectSelect');
+    const schemeInfo = document.getElementById('schemeInfo');
+    const intMaxLabel = document.getElementById('intMaxLabel');
+    const extMaxLabel = document.getElementById('extMaxLabel');
+    const pracMaxLabel = document.getElementById('pracMaxLabel');
+    const totalMaxLabel = document.getElementById('totalMaxLabel');
+    const passMarksLabel = document.getElementById('passMarksLabel');
+
+    function updateScheme() {
+        const opt = subjSelect.options[subjSelect.selectedIndex];
+        if (opt && opt.value) {
+            schemeInfo.style.display = 'block';
+            intMaxLabel.textContent = opt.dataset.int;
+            extMaxLabel.textContent = opt.dataset.ext;
+            pracMaxLabel.textContent = opt.dataset.prac;
+            totalMaxLabel.textContent = opt.dataset.total;
+            passMarksLabel.textContent = opt.dataset.pass;
+        } else {
+            schemeInfo.style.display = 'none';
+        }
+    }
+
+    subjSelect.addEventListener('change', updateScheme);
+    updateScheme();
+});
+</script>
+{% endblock %}

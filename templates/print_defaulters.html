@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official MSBTE Monthly Attendance Defaulter Notice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; font-size: 0.85rem; }
+        .print-container { max-width: 1050px; margin: 20px auto; background: #fff; padding: 35px 45px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+        .print-header { border-bottom: 2px solid #ef4444; padding-bottom: 12px; margin-bottom: 20px; }
+        .table-custom th { background-color: #fef2f2; color: #991b1b; font-size: 0.76rem; text-transform: uppercase; font-weight: 700; }
+        .rule-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; margin-bottom: 20px; font-size: 0.8rem; border-radius: 6px; }
+        @media print {
+            body { background: #fff; }
+            .print-container { box-shadow: none; border: none; padding: 0; margin: 0; max-width: 100%; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container my-3 no-print text-end" style="max-width: 1050px;">
+    <button onclick="window.print()" class="btn btn-danger btn-sm px-4 rounded-pill shadow-sm">
+        <i class="fa-solid fa-print me-1"></i> Print Official Notice / Save PDF
+    </button>
+    <a href="javascript:window.close()" class="btn btn-outline-secondary btn-sm rounded-pill ms-1 px-3">
+        <i class="fa-solid fa-xmark me-1"></i> Close
+    </a>
+</div>
+
+<div class="print-container">
+    <div class="print-header d-flex justify-content-between align-items-center">
+        <div>
+            <span class="badge bg-danger mb-1 px-3 py-1 text-uppercase">Official Department Notice</span>
+            <h4 class="fw-bold text-danger mb-0" style="font-family: 'Outfit', sans-serif;">MONTHLY ATTENDANCE DEFAULTER LIST</h4>
+            <div class="text-secondary small fw-semibold">Maharashtra State Board of Technical Education (MSBTE) Academic Regulations</div>
+        </div>
+        <div class="text-end text-muted small">
+            <div><strong>Notice Date:</strong> {{ generated_date }}</div>
+            <div><strong>Defaulters Count:</strong> {{ defaulters|length }} Students (< 75%)</div>
+        </div>
+    </div>
+
+    <div class="rule-box">
+        <strong>Important MSBTE Board Rule (Regulation 14):</strong> As per MSBTE norms, students must maintain a minimum of <strong>75% aggregate attendance</strong> in all theory and practical courses. Students falling below 75% are liable to be detained and disbarred from appearing in the upcoming MSBTE Board Examinations unless an official parent undertaking is submitted.
+    </div>
+
+    <table class="table table-bordered table-sm table-custom align-middle">
+        <thead>
+            <tr>
+                <th style="width: 5%;">#</th>
+                <th style="width: 15%;">Enrollment No</th>
+                <th style="width: 25%;">Student Name</th>
+                <th style="width: 12%;">Branch</th>
+                <th class="text-center" style="width: 8%;">Sem</th>
+                <th class="text-center" style="width: 10%;">Attendance</th>
+                <th class="text-center" style="width: 10%;">Missed / Total</th>
+                <th class="text-center" style="width: 15%;">Action Required</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in defaulters %}
+            {% set s = d.student %}
+            <tr>
+                <td class="text-muted">{{ loop.index }}</td>
+                <td class="font-monospace fw-bold text-danger">{{ s.enrollment_no }}</td>
+                <td class="fw-bold text-dark">{{ s.name }}</td>
+                <td>{{ s.branch }}</td>
+                <td class="text-center">Sem {{ s.semester }}</td>
+                <td class="text-center fw-bold text-danger">{{ d.attendance }}%</td>
+                <td class="text-center">{{ d.missed }} / {{ d.total_conducted }}</td>
+                <td class="text-center">
+                    {% if d.attendance < 60 %}
+                        <span class="badge bg-danger rounded-pill px-2">Detention Warning</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark rounded-pill px-2">Parent Undertaking</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="text-center py-4 text-success fw-bold">All enrolled students have maintained above 75% attendance. No defaulters!</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="row text-center mt-5 pt-4">
+        <div class="col-4"><div class="border-top pt-2 small text-muted fw-semibold">Class Coordinator / Teacher</div></div>
+        <div class="col-4"><div class="border-top pt-2 small text-muted fw-semibold">Head of Department (HOD)</div></div>
+        <div class="col-4"><div class="border-top pt-2 small text-muted fw-semibold">Principal / Institute Head</div></div>
+    </div>
+</div>
+
+</body>
+</html>
