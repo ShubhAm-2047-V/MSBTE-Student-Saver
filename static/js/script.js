@@ -1,15 +1,47 @@
 // MSBTE Student Saver Interactive Motion & Animation System
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Sidebar Toggle with Smooth Class Transition
+    // 1. Sidebar Toggle & Mobile Off-canvas Handlers
     const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
     const wrapper = document.getElementById('wrapper');
     
-    if (sidebarToggle && wrapper) {
+    function toggleSidebar() {
+        if (wrapper) wrapper.classList.toggle('toggled');
+    }
+
+    function closeSidebar() {
+        if (wrapper) wrapper.classList.remove('toggled');
+    }
+
+    if (sidebarToggle) {
         sidebarToggle.addEventListener('click', function(e) {
             e.preventDefault();
-            wrapper.classList.toggle('toggled');
+            toggleSidebar();
         });
     }
+
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeSidebar();
+        });
+    }
+
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', function() {
+            closeSidebar();
+        });
+    }
+
+    // Auto-close sidebar on mobile when navigating
+    document.querySelectorAll('#sidebar-wrapper .nav-link').forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth < 992) {
+                closeSidebar();
+            }
+        });
+    });
 
     // 2. Dynamic Number Counter Animation for KPI Values
     function animateCounters() {

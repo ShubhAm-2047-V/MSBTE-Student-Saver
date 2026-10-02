@@ -18,10 +18,13 @@
 
 {% if session.get('user_id') %}
 <div id="wrapper">
+    <!-- Backdrop overlay for mobile devices -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
     <!-- Sleek Dark Sidebar -->
     <div id="sidebar-wrapper">
         <!-- Sidebar Brand -->
-        <div class="sidebar-brand">
+        <div class="sidebar-brand d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
                 <div class="brand-icon">
                     <i class="fa-solid fa-graduation-cap fs-5 text-warning"></i>
@@ -31,6 +34,9 @@
                     <small class="text-secondary" style="font-size: 0.72rem; letter-spacing: 0.4px;">Diploma Academic Saver</small>
                 </div>
             </div>
+            <button class="btn btn-sm text-white-50 p-1 border-0 d-lg-none" id="sidebarClose" title="Close Sidebar">
+                <i class="fa-solid fa-xmark fs-5"></i>
+            </button>
         </div>
 
         <!-- User Profile Badge -->
@@ -128,13 +134,17 @@
         <!-- Top Navbar -->
         <nav class="top-navbar d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-outline-secondary btn-sm rounded-3" id="sidebarToggle" title="Toggle Navigation Sidebar">
+                <button class="btn btn-outline-secondary btn-sm rounded-3 px-3" id="sidebarToggle" title="Toggle Navigation Sidebar">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div class="d-none d-md-flex align-items-center gap-2">
                     <span class="fw-bold text-dark" style="font-size: 0.95rem; font-family: 'Outfit', sans-serif;">
                         MSBTE Student Saver - Academic Performance & Early Warning System
                     </span>
+                </div>
+                <div class="d-flex d-md-none align-items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-warning"></i>
+                    <span class="fw-bold text-dark" style="font-size: 0.92rem; font-family: 'Outfit', sans-serif;">MSBTE Saver</span>
                 </div>
             </div>
 
