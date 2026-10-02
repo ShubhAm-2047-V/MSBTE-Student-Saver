@@ -8,7 +8,7 @@ from routes import register_routes
 
 def create_app(config_class=Config):
     """Application factory for MSBTE Student Saver."""
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static', static_url_path='/static')
     app.config.from_object(config_class)
 
     # Initialize extensions
