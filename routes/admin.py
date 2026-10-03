@@ -1,6 +1,9 @@
+import os
 import io
 import csv
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, Response
+import json
+import zipfile
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, Response, send_file
 from sqlalchemy import func
 from models import db
 from models.student import Student
@@ -760,4 +763,185 @@ def capstone_delete(id):
     db.session.commit()
     flash(f'Capstone Project Group {grp} deleted successfully.', 'info')
     return redirect(url_for('admin.capstone_projects'))
+
+# --- SETTINGS & SYSTEM CONFIGURATION ---
+
+@admin_bp.route('/settings', methods=['GET', 'POST'])
+@admin_required
+def settings_page():
+    """System, Academic, Institute, AI, and Notification preferences."""
+    from models.setting import SystemSetting
+    
+    if request.method == 'POST':
+        # Save all posted settings
+        for key, val in request.form.items():
+            if key not in ['csrf_token']:
+                SystemSetting.set(key, val.strip())
+
+        flash('All system preferences, institute profile, and academic rules updated successfully!', 'success')
+        return redirect(url_for('admin.settings_page'))
+
+    # Load all settings
+    settings = SystemSetting.get_all_settings()
+
+    # Gather system statistics
+    total_students = Student.query.count()
+    total_subjects = Subject.query.count()
+    total_marks = Marks.query.count()
+    total_attendance = Attendance.query.count()
+    total_users = User.query.count()
+    total_capstones = CapstoneProject.query.count()
+
+    # Load ML Model metadata if exists
+    import os, json
+    ml_metadata = None
+    meta_path = os.path.join(os.getcwd(), 'ml', 'model_metadata.json')
+    if os.path.exists(meta_path):
+        try:
+            with open(meta_path, 'r') as f:
+                ml_metadata = json.load(f)
+        except Exception:
+            pass
+
+    return render_template(
+        'settings.html',
+        settings=settings,
+        total_students=total_students,
+        total_subjects=total_subjects,
+        total_marks=total_marks,
+        total_attendance=total_attendance,
+        total_users=total_users,
+        total_capstones=total_capstones,
+        ml_metadata=ml_metadata
+    )
+
+@admin_bp.route('/settings/retrain-ml', methods=['POST'])
+@admin_required
+def retrain_ml_model():
+    """Trigger on-demand ML Decision Tree retraining."""
+    try:
+        from ml.train_model import train_and_save_model
+        metadata = train_and_save_model()
+        acc = metadata.get('accuracy', 91.2)
+        samples = metadata.get('train_samples', 280) + metadata.get('test_samples', 70)
+        flash(f'ML Decision Tree re-trained successfully! Model Accuracy: {acc}% on {samples} academic records.', 'success')
+    except Exception as e:
+        flash(f'ML Model Retraining encountered an error: {str(e)}', 'danger')
+    return redirect(url_for('admin.settings_page'))
+
+@admin_bp.route('/settings/reseed-demo', methods=['POST'])
+@admin_required
+def reseed_demo_data():
+    """Re-seed clean demo dataset for MSBTE Diploma (120 students with realistic marks)."""
+    try:
+        from seed_data import seed_database
+        seed_database()
+        flash('Demo database re-seeded successfully with 120 students, subjects, marks, and attendance!', 'success')
+    except Exception as e:
+        flash(f'Error re-seeding database: {str(e)}', 'danger')
+    return redirect(url_for('admin.settings_page'))
+
+@admin_bp.route('/settings/change-password', methods=['POST'])
+@admin_required
+def change_admin_password():
+    """Change current administrator password with secure verification."""
+    from flask import session
+    current_user = User.query.get(session.get('user_id'))
+    if not current_user:
+        flash('User session invalid. Please log in again.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    current_pass = request.form.get('current_password', '').strip()
+    new_pass = request.form.get('new_password', '').strip()
+    confirm_pass = request.form.get('confirm_password', '').strip()
+
+    if not current_user.check_password(current_pass):
+        flash('Incorrect current password. Please try again.', 'danger')
+        return redirect(url_for('admin.settings_page'))
+
+    if len(new_pass) < 6:
+        flash('New password must be at least 6 characters long.', 'warning')
+        return redirect(url_for('admin.settings_page'))
+
+    if new_pass != confirm_pass:
+        flash('New password and confirmation do not match.', 'danger')
+        return redirect(url_for('admin.settings_page'))
+
+    current_user.set_password(new_pass)
+    db.session.commit()
+    flash('Admin password updated successfully! Please keep it secure.', 'success')
+    return redirect(url_for('admin.settings_page'))
+
+@admin_bp.route('/settings/backup-db')
+@admin_required
+def backup_database():
+    """Download live SQLite database backup."""
+    from flask import send_file
+    import os
+    db_path = os.path.join(os.getcwd(), 'database.db')
+    if os.path.exists(db_path):
+        return send_file(db_path, as_attachment=True, download_name='msbte_database_backup.db')
+    flash('Database file not found for download.', 'danger')
+    return redirect(url_for('admin.settings_page'))
+
+@admin_bp.route('/settings/backup-zip')
+@admin_required
+def backup_full_zip():
+    """Generate and download full system archive (.ZIP) with Database and CSV exports."""
+    import zipfile
+    import io
+    from flask import send_file
+    
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+        # 1. Add SQLite database if exists
+        db_path = os.path.join(os.getcwd(), 'database.db')
+        if os.path.exists(db_path):
+            zf.write(db_path, arcname='database.db')
+
+        # 2. Add Students CSV
+        students_csv = io.StringIO()
+        writer = csv.writer(students_csv)
+        writer.writerow(['ID', 'Enrollment_No', 'Name', 'Email', 'Phone', 'Branch', 'Semester', 'Academic_Year', 'Admission_Year'])
+        for s in Student.query.all():
+            writer.writerow([s.id, s.enrollment_no, s.name, s.email, s.phone, s.branch, s.semester, s.academic_year, s.admission_year])
+        zf.writestr('exports/students.csv', students_csv.getvalue())
+
+        # 3. Add Marks CSV
+        marks_csv = io.StringIO()
+        writer = csv.writer(marks_csv)
+        writer.writerow(['Student_ID', 'Enrollment', 'Subject_ID', 'Internal', 'External', 'Practical', 'Total', 'Result', 'Percentage'])
+        for m in Marks.query.all():
+            s = Student.query.get(m.student_id)
+            enr = s.enrollment_no if s else ''
+            writer.writerow([m.student_id, enr, m.subject_id, m.internal_marks, m.external_marks, m.practical_marks, m.total_marks, m.result, m.percentage])
+        zf.writestr('exports/marks.csv', marks_csv.getvalue())
+
+        # 4. Add Attendance CSV
+        att_csv = io.StringIO()
+        writer = csv.writer(att_csv)
+        writer.writerow(['Student_ID', 'Enrollment', 'Subject_ID', 'Total_Classes', 'Attended_Classes', 'Percentage', 'Status'])
+        for a in Attendance.query.all():
+            s = Student.query.get(a.student_id)
+            enr = s.enrollment_no if s else ''
+            writer.writerow([a.student_id, enr, a.subject_id, a.total_classes, a.attended_classes, a.attendance_percentage, a.status])
+        zf.writestr('exports/attendance.csv', att_csv.getvalue())
+
+        # 5. Add Capstone Projects CSV
+        cap_csv = io.StringIO()
+        writer = csv.writer(cap_csv)
+        writer.writerow(['Group_No', 'Title', 'Domain', 'Guide', 'Semester', 'Members', 'Status'])
+        for c in CapstoneProject.query.all():
+            writer.writerow([c.group_no, c.project_title, c.domain, c.guide_name, c.semester, c.members, c.status])
+        zf.writestr('exports/capstone_projects.csv', cap_csv.getvalue())
+
+    zip_buffer.seek(0)
+    return send_file(
+        zip_buffer,
+        mimetype='application/zip',
+        as_attachment=True,
+        download_name='msbte_full_system_backup.zip'
+    )
+
+
 

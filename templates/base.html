@@ -95,7 +95,7 @@
 
             <div class="sidebar-divider my-2"></div>
 
-            <a href="#" class="nav-link">
+            <a href="{{ url_for('admin.settings_page') }}" class="nav-link {% if request.endpoint == 'admin.settings_page' %}active{% endif %}">
                 <i class="fa-solid fa-gear"></i>
                 <span>Settings</span>
             </a>
