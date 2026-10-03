@@ -130,6 +130,47 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500);
         }, 5000);
     });
+
+    // 6. Notification Center Interactions
+    const markAllReadBtn = document.getElementById('markAllReadBtn');
+    const notifBadgeCount = document.getElementById('notifBadgeCount');
+    const notifPillLabel = document.getElementById('notifPillLabel');
+
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Mark all items as read
+            document.querySelectorAll('.notif-item').forEach(item => {
+                item.classList.remove('unread');
+                item.style.opacity = '0.65';
+            });
+
+            // Update badge counts
+            if (notifBadgeCount) notifBadgeCount.style.display = 'none';
+            if (notifPillLabel) {
+                notifPillLabel.innerText = '0 New';
+                notifPillLabel.classList.remove('bg-primary');
+                notifPillLabel.classList.add('bg-secondary');
+            }
+            markAllReadBtn.innerText = 'All Read ✓';
+            markAllReadBtn.classList.remove('text-primary');
+            markAllReadBtn.classList.add('text-muted');
+        });
+    }
+
+    // 7. Global Keyboard Shortcut for Search (Ctrl + K)
+    const searchInput = document.getElementById('globalSearchInput');
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select();
+            }
+        }
+    });
 });
 
 // Inject Ripple Keyframes Dynamically

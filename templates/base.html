@@ -170,12 +170,81 @@
                     <span>AY 2025-2026 &bull; Sem 5 & 6</span>
                 </div>
 
-                <!-- Notification Bell -->
-                <div class="notification-btn-wrapper position-relative">
-                    <button class="btn btn-light rounded-circle shadow-sm border p-2 text-dark">
-                        <i class="fa-regular fa-bell"></i>
+                <!-- Notification Bell Dropdown -->
+                <div class="dropdown notification-btn-wrapper position-relative">
+                    <button class="btn btn-light rounded-circle shadow-sm border p-2 text-dark" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="View Notifications">
+                        <i class="fa-regular fa-bell fs-6"></i>
                     </button>
-                    <span class="notification-badge">3</span>
+                    <span class="notification-badge" id="notifBadgeCount">3</span>
+
+                    <!-- Notification Dropdown Menu -->
+                    <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0 notification-dropdown-panel" aria-labelledby="notificationsDropdown">
+                        <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-light rounded-top-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.95rem;">Notifications</h6>
+                                <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;" id="notifPillLabel">3 New</span>
+                            </div>
+                            <button type="button" class="btn btn-link text-primary p-0 text-decoration-none small fw-semibold" id="markAllReadBtn" style="font-size: 0.75rem;">
+                                Mark all as read
+                            </button>
+                        </div>
+                        
+                        <div class="notification-list-body" style="max-height: 320px; overflow-y: auto;">
+                            <!-- Notif 1 -->
+                            <a href="{{ url_for('admin.defaulters_list') if session.get('role') == 'admin' else '#' }}" class="notif-item d-flex gap-3 p-3 border-bottom text-decoration-none unread">
+                                <div class="notif-icon-circle bg-danger-subtle text-danger">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <div class="fw-bold text-dark notif-title">Attendance Alert (&lt; 75%)</div>
+                                        <small class="text-muted" style="font-size: 0.7rem;">10m ago</small>
+                                    </div>
+                                    <p class="text-muted small mb-0 lh-sm notif-desc">
+                                        33 students flagged for low attendance below MSBTE norm.
+                                    </p>
+                                </div>
+                            </a>
+
+                            <!-- Notif 2 -->
+                            <a href="{{ url_for('marks.list_marks') if session.get('role') == 'admin' else '#' }}" class="notif-item d-flex gap-3 p-3 border-bottom text-decoration-none unread">
+                                <div class="notif-icon-circle bg-primary-subtle text-primary">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <div class="fw-bold text-dark notif-title">Marks Entry Active</div>
+                                        <small class="text-muted" style="font-size: 0.7rem;">2h ago</small>
+                                    </div>
+                                    <p class="text-muted small mb-0 lh-sm notif-desc">
+                                        Sem 5 Continuous Assessment Marks entry window is open.
+                                    </p>
+                                </div>
+                            </a>
+
+                            <!-- Notif 3 -->
+                            <a href="{{ url_for('prediction.predict_page') if session.get('role') == 'admin' else '#' }}" class="notif-item d-flex gap-3 p-3 text-decoration-none unread">
+                                <div class="notif-icon-circle bg-info-subtle text-info">
+                                    <i class="fa-solid fa-brain"></i>
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <div class="fw-bold text-dark notif-title">ML Early Warning Sync</div>
+                                        <small class="text-muted" style="font-size: 0.7rem;">Yesterday</small>
+                                    </div>
+                                    <p class="text-muted small mb-0 lh-sm notif-desc">
+                                        AI Risk assessment updated for current registered batch.
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="p-2 border-top text-center bg-light rounded-bottom-4">
+                            <a href="{{ url_for('admin.defaulters_list') if session.get('role') == 'admin' else '#' }}" class="text-primary small fw-semibold text-decoration-none">
+                                View All Defaulters &amp; Alerts &rarr;
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- User Profile & Dropdown -->
