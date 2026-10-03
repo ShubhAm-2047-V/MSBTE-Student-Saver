@@ -323,14 +323,14 @@ h1, h2, h3, h4, h5, h6 {
 .hero-banner-modern {
     background: #dbeafe;
     background-image: 
-        linear-gradient(90deg, #f0f7ff 0%, #f0f7ff 32%, rgba(240, 247, 255, 0.92) 48%, rgba(240, 247, 255, 0.1) 75%),
+        linear-gradient(90deg, #f0f7ff 0%, #f0f7ff 35%, rgba(240, 247, 255, 0.94) 48%, rgba(240, 247, 255, 0.15) 75%),
         url('../images/dashboard-hero.jpg');
     background-size: cover;
-    background-position: right center;
+    background-position: right 10%;
     background-repeat: no-repeat;
     border-radius: 22px;
-    padding: 32px 36px;
-    min-height: 235px;
+    padding: 34px 36px;
+    min-height: 255px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 8px 24px -4px rgba(59, 130, 246, 0.12);
