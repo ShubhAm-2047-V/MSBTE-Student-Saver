@@ -2,77 +2,573 @@
 
 {% block title %}Sign In | MSBTE Student Saver{% endblock %}
 
+{% block extra_css %}
+<style>
+/* ==========================================================================
+   MSBTE Student Saver - Exact Reference Login Screen
+   ========================================================================== */
+.login-page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 16px;
+    position: relative;
+    background: 
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4) 0%, rgba(241, 245, 253, 0.65) 100%),
+        url("{{ url_for('static', filename='images/login-bg.jpg') }}") center center / cover no-repeat fixed;
+    overflow-x: hidden;
+}
+
+/* Ambient Fluid Background Backdrops (Enhanced overlay) */
+.login-bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 15% 25%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(59, 130, 246, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 50% 10%, rgba(245, 158, 11, 0.05) 0%, transparent 35%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Central Elevated Card */
+.login-card-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 480px;
+    animation: loginCardPop 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes loginCardPop {
+    0% {
+        opacity: 0;
+        transform: translateY(28px) scale(0.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.login-card {
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 36px 36px 30px;
+    box-shadow: 
+        0 20px 60px -10px rgba(59, 130, 246, 0.14),
+        0 0 1px 1px rgba(0, 0, 0, 0.03),
+        0 4px 12px rgba(15, 23, 42, 0.04);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+/* Top Center Accent Bar */
+.login-top-pill {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 52px;
+    height: 4.5px;
+    background: #3b82f6;
+    border-radius: 0 0 6px 6px;
+}
+
+/* App Logo & Glow Sparkles */
+.logo-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-top: 4px;
+    margin-bottom: 12px;
+}
+
+.app-icon-squircle {
+    width: 68px;
+    height: 68px;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #4285f4 0%, #2563eb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 22px -3px rgba(37, 99, 235, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    position: relative;
+    z-index: 2;
+    transition: transform 0.3s ease;
+}
+
+.app-icon-squircle:hover {
+    transform: translateY(-2px) scale(1.03);
+}
+
+/* Sparkle Stars Around Logo */
+.sparkle-star {
+    position: absolute;
+    color: #fbbf24;
+    font-size: 10px;
+    z-index: 1;
+    animation: sparkleTwinkle 2.5s infinite ease-in-out alternate;
+    user-select: none;
+    pointer-events: none;
+}
+.sparkle-1 { top: -2px; left: -14px; font-size: 8px; animation-delay: 0s; }
+.sparkle-2 { top: 6px; right: -16px; font-size: 9px; animation-delay: 0.8s; }
+.sparkle-3 { bottom: 10px; left: -16px; font-size: 7px; animation-delay: 1.4s; }
+.sparkle-4 { bottom: -2px; right: -12px; font-size: 8px; animation-delay: 0.4s; }
+
+@keyframes sparkleTwinkle {
+    0% { transform: scale(0.7) rotate(0deg); opacity: 0.4; }
+    50% { transform: scale(1.2) rotate(15deg); opacity: 1; }
+    100% { transform: scale(0.85) rotate(-10deg); opacity: 0.6; }
+}
+
+/* Brand Title & Subtitle */
+.brand-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.62rem;
+    color: #1e293b;
+    margin-bottom: 3px;
+    letter-spacing: -0.015em;
+}
+
+.brand-title .saver-accent {
+    color: #2563eb;
+    font-weight: 700;
+}
+
+.brand-subtitle {
+    color: #64748b;
+    font-size: 0.84rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+/* Golden Hat Divider */
+.golden-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 22px;
+}
+
+.golden-divider .line {
+    height: 1.5px;
+    width: 44px;
+}
+.golden-divider .line-left {
+    background: linear-gradient(90deg, transparent, #fbbf24);
+}
+.golden-divider .line-right {
+    background: linear-gradient(90deg, #fbbf24, transparent);
+}
+.golden-divider .cap-icon {
+    color: #f59e0b;
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+/* Form Input Groups */
+.form-field-group {
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+.form-field-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 7px;
+}
+
+.form-field-label i {
+    color: #2563eb;
+    font-size: 0.85rem;
+}
+
+.input-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-left {
+    position: absolute;
+    left: 15px;
+    color: #94a3b8;
+    font-size: 0.95rem;
+    pointer-events: none;
+    z-index: 3;
+    transition: color 0.2s ease;
+}
+
+.custom-input {
+    width: 100%;
+    height: 48px;
+    padding: 11px 16px 11px 42px;
+    font-size: 0.92rem;
+    color: #1e293b;
+    background-color: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.2s ease-in-out;
+    outline: none;
+}
+
+.custom-input.with-toggle {
+    padding-right: 44px;
+}
+
+.custom-input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 0.9rem;
+}
+
+.custom-input:focus {
+    border-color: #3b82f6;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.input-icon-wrapper:focus-within .input-icon-left {
+    color: #2563eb;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 12px;
+    background: transparent;
+    border: none;
+    padding: 6px;
+    color: #94a3b8;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: color 0.2s ease;
+    z-index: 3;
+}
+
+.password-toggle-btn:hover {
+    color: #475569;
+}
+
+/* Sign In Button */
+.btn-signin-portal {
+    width: 100%;
+    height: 50px;
+    background: linear-gradient(90deg, #3d6df6 0%, #2563eb 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 10px 22px -4px rgba(37, 99, 235, 0.42);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-top: 6px;
+    text-decoration: none;
+}
+
+.btn-signin-portal:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.5);
+    background: linear-gradient(90deg, #3260ee 0%, #1d4ed8 100%);
+    color: #ffffff;
+}
+
+.btn-signin-portal:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 14px -2px rgba(37, 99, 235, 0.4);
+}
+
+.arrow-circle-icon {
+    width: 24px;
+    height: 24px;
+    background: #ffffff;
+    color: #2563eb;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.25s ease;
+}
+
+.btn-signin-portal:hover .arrow-circle-icon {
+    transform: translateX(2px);
+}
+
+/* Demo Logins Box */
+.demo-logins-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 13px 14px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.demo-logins-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: #2563eb;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.demo-logins-header i {
+    color: #f59e0b;
+    font-size: 0.88rem;
+}
+
+.demo-buttons-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.demo-pill-btn {
+    flex: 1;
+    height: 38px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.demo-pill-admin {
+    background: #eff6ff;
+    border: 1.5px solid #dbeafe;
+    color: #2563eb;
+}
+
+.demo-pill-admin:hover {
+    background: #dbeafe;
+    border-color: #bfdbfe;
+    transform: translateY(-1px);
+    color: #1d4ed8;
+}
+
+.demo-pill-student {
+    background: #fffbeb;
+    border: 1.5px solid #fef3c7;
+    color: #b45309;
+}
+
+.demo-pill-student:hover {
+    background: #fef3c7;
+    border-color: #fde68a;
+    transform: translateY(-1px);
+    color: #92400e;
+}
+
+/* Security Badge */
+.security-note {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 0.76rem;
+    color: #64748b;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.security-note i {
+    color: #10b981;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 576px) {
+    .login-card {
+        padding: 28px 20px 24px;
+        border-radius: 22px;
+    }
+    .brand-title {
+        font-size: 1.45rem;
+    }
+}
+</style>
+{% endblock %}
+
 {% block public_content %}
-<div class="d-flex align-items-center justify-content-center min-vh-100 py-5" 
-     style="background: radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.08) 0%, rgba(248, 250, 252, 1) 90%);">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-5">
-                <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white position-relative overflow-hidden">
-                    <!-- Top Gradient Line -->
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: var(--primary-gradient);"></div>
+<div class="login-page-wrapper">
+    <!-- Ambient Overlay for lighting depth -->
+    <div class="login-bg-overlay"></div>
 
-                    <!-- Brand Header -->
-                    <div class="text-center mb-4 mt-2">
-                        <div class="d-inline-flex align-items-center justify-content-center text-white rounded-4 p-3 mb-3 shadow-md"
-                             style="width: 58px; height: 58px; background: var(--primary-gradient);">
-                            <i class="fa-solid fa-graduation-cap fs-2 text-warning"></i>
+    <div class="login-card-container">
+        <div class="login-card text-center">
+            <!-- Top Accent Pill -->
+            <div class="login-top-pill"></div>
+
+            <!-- Brand Logo with Sparkles -->
+            <div class="logo-wrapper">
+                <span class="sparkle-star sparkle-1">✦</span>
+                <span class="sparkle-star sparkle-2">✦</span>
+                <span class="sparkle-star sparkle-3">✦</span>
+                <span class="sparkle-star sparkle-4">✦</span>
+                
+                <div class="app-icon-squircle">
+                    <!-- 3D Golden Graduation Cap SVG -->
+                    <svg width="42" height="42" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Graduation Cap Top Rhombus -->
+                        <path d="M32 10L58 23L32 36L6 23L32 10Z" fill="url(#goldGradientTop)" stroke="#d97706" stroke-width="1.5" stroke-linejoin="round"/>
+                        <!-- Cap Lower Skullcap -->
+                        <path d="M16 28.5V40C16 46 23.16 51 32 51C40.84 51 48 46 48 40V28.5L32 36.5L16 28.5Z" fill="url(#goldGradientBottom)" stroke="#b45309" stroke-width="1.5"/>
+                        <!-- Top Center Button -->
+                        <circle cx="32" cy="23" r="3" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                        <!-- Tassel Ribbon -->
+                        <path d="M32 23C32 23 44 26 46 33C46.8 35.8 46.5 44 46.5 44" stroke="#fef08a" stroke-width="2.5" stroke-linecap="round"/>
+                        <!-- Tassel Fringe Bobble -->
+                        <circle cx="46.5" cy="45" r="3.5" fill="#fbbf24" stroke="#d97706" stroke-width="1"/>
+                        <path d="M44.5 47L44 54M46.5 48.5V55M48.5 47L49 54" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+                        
+                        <!-- Gradients -->
+                        <defs>
+                            <linearGradient id="goldGradientTop" x1="6" y1="10" x2="58" y2="36" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#fef08a"/>
+                                <stop offset="0.4" stop-color="#fcd34d"/>
+                                <stop offset="1" stop-color="#f59e0b"/>
+                            </linearGradient>
+                            <linearGradient id="goldGradientBottom" x1="16" y1="28.5" x2="48" y2="51" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#fbbf24"/>
+                                <stop offset="1" stop-color="#d97706"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Brand Header -->
+            <h1 class="brand-title">MSBTE Student <span class="saver-accent">Saver</span></h1>
+            <p class="brand-subtitle">Academic Performance & Early Warning System</p>
+
+            <!-- Decorative Golden Hat Divider -->
+            <div class="golden-divider">
+                <div class="line line-left"></div>
+                <i class="fa-solid fa-graduation-cap cap-icon"></i>
+                <div class="line line-right"></div>
+            </div>
+
+            <!-- Flash Error/Info Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show small mb-3 text-start rounded-3 shadow-sm border-0 d-flex align-items-center justify-content-between p-2 px-3" role="alert">
+                            <div>
+                                <i class="fa-solid fa-circle-info me-1"></i> {{ message }}
+                            </div>
+                            <button type="button" class="btn-close p-2" data-bs-dismiss="alert" style="font-size: 0.7rem;"></button>
                         </div>
-                        <h3 class="fw-bold mb-1 text-dark" style="font-family: 'Outfit', sans-serif;">MSBTE Student Saver</h3>
-                        <p class="text-muted small mb-0">Academic Performance & Early Warning System</p>
-                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
-                    <!-- Flash messages in login -->
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} alert-dismissible fade show small mb-3 border-0 rounded-3 shadow-sm" role="alert">
-                                    <i class="fa-solid fa-circle-info me-1"></i> {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-
-                    <form method="POST" action="{{ url_for('auth.login') }}">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-dark">
-                                <i class="fa-solid fa-user me-1 text-primary"></i> Username / Enrollment Number
-                            </label>
-                            <input type="text" class="form-control form-control-lg" id="usernameInput" name="username" placeholder="e.g. admin or 2300520001" required autofocus style="font-size: 0.95rem;">
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-dark">
-                                <i class="fa-solid fa-lock me-1 text-primary"></i> Password
-                            </label>
-                            <input type="password" class="form-control form-control-lg" id="passwordInput" name="password" placeholder="Enter your password" required style="font-size: 0.95rem;">
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 py-3 fs-6 mb-3 shadow-md">
-                            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> Sign In to Portal
-                        </button>
-                    </form>
-
-                    <!-- Quick 1-Click Demo Login Box -->
-                    <div class="p-3 bg-light rounded-3 border mt-3 text-center">
-                        <small class="fw-bold text-primary d-block mb-2">
-                            <i class="fa-solid fa-bolt text-warning me-1"></i> Quick 1-Click Demo Logins:
-                        </small>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="fillCreds('admin', 'admin123')">
-                                <i class="fa-solid fa-user-shield me-1"></i> Admin
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="fillCreds('2300520001', 'stud@0001')">
-                                <i class="fa-solid fa-user-graduate me-1"></i> Student
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="text-center mt-4 text-muted small" style="font-size: 0.75rem;">
-                        <i class="fa-solid fa-shield-halved text-success me-1"></i> Secured via Werkzeug Salted SHA-256 Hashing.
+            <!-- Login Form -->
+            <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm">
+                <!-- Username / Enrollment Field -->
+                <div class="form-field-group">
+                    <label class="form-field-label" for="usernameInput">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Username / Enrollment Number</span>
+                    </label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-regular fa-user input-icon-left"></i>
+                        <input 
+                            type="text" 
+                            class="custom-input" 
+                            id="usernameInput" 
+                            name="username" 
+                            placeholder="e.g. admin or 2300520001" 
+                            required 
+                            autofocus 
+                            autocomplete="username"
+                        >
                     </div>
                 </div>
+
+                <!-- Password Field -->
+                <div class="form-field-group">
+                    <label class="form-field-label" for="passwordInput">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>Password</span>
+                    </label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-lock input-icon-left"></i>
+                        <input 
+                            type="password" 
+                            class="custom-input with-toggle" 
+                            id="passwordInput" 
+                            name="password" 
+                            placeholder="Enter your password" 
+                            required 
+                            autocomplete="current-password"
+                        >
+                        <button type="button" class="password-toggle-btn" id="togglePasswordBtn" title="Toggle password visibility">
+                            <i class="fa-regular fa-eye-slash" id="togglePasswordIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sign In Button -->
+                <button type="submit" class="btn-signin-portal" id="submitBtn">
+                    <span class="arrow-circle-icon">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </span>
+                    <span>Sign In to Portal</span>
+                </button>
+            </form>
+
+            <!-- Quick 1-Click Demo Logins -->
+            <div class="demo-logins-box">
+                <div class="demo-logins-header">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Quick 1-Click Demo Logins:</span>
+                </div>
+                <div class="demo-buttons-row">
+                    <button type="button" class="demo-pill-btn demo-pill-admin" onclick="fillCreds('admin', 'admin123')">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Admin</span>
+                    </button>
+                    <button type="button" class="demo-pill-btn demo-pill-student" onclick="fillCreds('2300520001', 'stud@0001')">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>Student</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Security Footer -->
+            <div class="security-note">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Secured via Werkzeug Salted SHA-256 Hashing</span>
             </div>
         </div>
     </div>
@@ -81,9 +577,48 @@
 
 {% block extra_js %}
 <script>
-function fillCreds(u, p) {
-    document.getElementById('usernameInput').value = u;
-    document.getElementById('passwordInput').value = p;
+// Fast Demo Fill Helper
+function fillCreds(username, password) {
+    const userInput = document.getElementById('usernameInput');
+    const passInput = document.getElementById('passwordInput');
+    
+    userInput.value = username;
+    passInput.value = password;
+    
+    // Highlight briefly for immediate visual feedback
+    [userInput, passInput].forEach(el => {
+        el.style.borderColor = '#3b82f6';
+        el.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.2)';
+        setTimeout(() => {
+            el.style.borderColor = '';
+            el.style.boxShadow = '';
+        }, 500);
+    });
 }
+
+// Password Visibility Toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('togglePasswordBtn');
+    const passInput = document.getElementById('passwordInput');
+    const toggleIcon = document.getElementById('togglePasswordIcon');
+
+    if (toggleBtn && passInput && toggleIcon) {
+        toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const isPassword = passInput.getAttribute('type') === 'password';
+            passInput.setAttribute('type', isPassword ? 'text' : 'password');
+            
+            if (isPassword) {
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+                toggleBtn.setAttribute('title', 'Hide password');
+            } else {
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+                toggleBtn.setAttribute('title', 'Show password');
+            }
+        });
+    }
+});
 </script>
 {% endblock %}
