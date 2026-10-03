@@ -4,241 +4,398 @@
 
 {% block content %}
 <div class="dashboard-wrapper">
-    <!-- Hero Banner Greeting -->
-    <div class="hero-banner mb-4">
+    <!-- Hero Banner with 3D Academic Artwork -->
+    <div class="hero-banner-modern mb-4">
         <div class="row align-items-center">
-            <div class="col-lg-8">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge bg-warning text-dark font-monospace fw-bold px-3 py-1 rounded-pill">
-                        <i class="fa-solid fa-sparkles me-1"></i> MSBTE Academic Intelligence
-                    </span>
-                    <span class="badge bg-white bg-opacity-20 text-white font-monospace px-3 py-1 rounded-pill">
-                        AY 2025-26
-                    </span>
+            <div class="col-lg-7 col-xl-6 hero-content-col">
+                <!-- Academic Intelligence Tag -->
+                <div class="hero-tag-pill mb-3">
+                    <span class="hero-tag-icon">🎓</span>
+                    <span>MSBTE Academic Intelligence</span>
                 </div>
-                <h2 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif;">
-                    Student Performance & Early Warning Dashboard
-                </h2>
-                <p class="text-white-50 mb-0" style="max-width: 650px; font-size: 0.95rem;">
-                    Monitor diploma academic progress, track 75% attendance compliance, and identify at-risk students with real-time Decision Tree classification.
+
+                <!-- Main Hero Headline -->
+                <h1 class="hero-main-title">
+                    Empowering<br>
+                    Smarter <span class="highlight-students">Students</span> <span class="sparkle-accent">✦</span>
+                </h1>
+
+                <!-- Hero Subtitle -->
+                <p class="hero-description">
+                    Track academic performance, predict risks early, and help every student achieve their goal with data-driven insights.
                 </p>
-            </div>
-            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                <div class="d-inline-flex flex-wrap gap-2 justify-content-lg-end">
-                    <a href="{{ url_for('admin.student_add') }}" class="btn btn-warning text-dark fw-bold shadow-sm">
-                        <i class="fa-solid fa-user-plus"></i> Add Student
-                    </a>
-                    <a href="{{ url_for('marks.list_marks') }}" class="btn btn-light fw-bold">
-                        <i class="fa-solid fa-pen-to-square text-primary"></i> Enter Marks
-                    </a>
+
+                <!-- 3 Feature Highlights Badges -->
+                <div class="hero-badges-row d-flex flex-wrap gap-2 pt-2">
+                    <div class="hero-feature-badge">
+                        <i class="fa-solid fa-chart-column text-primary"></i>
+                        <span>Real-time Analytics</span>
+                    </div>
+                    <div class="hero-feature-badge">
+                        <i class="fa-solid fa-wand-magic-sparkles text-purple"></i>
+                        <span>AI-Powered Insights</span>
+                    </div>
+                    <div class="hero-feature-badge">
+                        <i class="fa-solid fa-shield-halved text-success"></i>
+                        <span>Better Academic Outcomes</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 5 Glowing KPI Metric Cards -->
+    <!-- 5 Glassy Metric KPI Cards -->
     <div class="row g-3 mb-4">
         <!-- 1. Total Students -->
-        <div class="col-6 col-lg">
-            <div class="kpi-card-modern kpi-primary border-accent-primary">
-                <div class="kpi-icon-box">
-                    <i class="fa-solid fa-user-graduate"></i>
-                </div>
-                <div>
-                    <div class="kpi-val">{{ total_students }}</div>
-                    <div class="kpi-title">Total Students</div>
-                    <small class="text-muted" style="font-size: 0.72rem;">Registered in System</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- 2. Average Percentage -->
-        <div class="col-6 col-lg">
-            <div class="kpi-card-modern kpi-info border-accent-info">
-                <div class="kpi-icon-box">
-                    <i class="fa-solid fa-percent"></i>
-                </div>
-                <div>
-                    <div class="kpi-val">{{ avg_percentage }}%</div>
-                    <div class="kpi-title">Average Score</div>
-                    <small class="text-muted" style="font-size: 0.72rem;">All Subjects Aggregate</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Average Attendance -->
-        <div class="col-6 col-lg">
-            <div class="kpi-card-modern kpi-success border-accent-success">
-                <div class="kpi-icon-box">
-                    <i class="fa-solid fa-calendar-check"></i>
-                </div>
-                <div>
-                    <div class="kpi-val">{{ avg_attendance }}%</div>
-                    <div class="kpi-title">Avg Attendance</div>
-                    <small class="text-muted" style="font-size: 0.72rem;">Norm: &ge; 75% Required</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. Students Needing Attention (At Risk) -->
-        <div class="col-6 col-lg">
-            <div class="kpi-card-modern kpi-danger border-accent-danger">
-                <div class="kpi-icon-box">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div>
-                    <div class="kpi-val">{{ at_risk_count }}</div>
-                    <div class="kpi-title">Need Attention</div>
-                    <small class="text-muted" style="font-size: 0.72rem;">Early Warning Alerts</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- 5. Pass Percentage -->
-        <div class="col-12 col-lg">
-            <div class="kpi-card-modern kpi-warning border-accent-warning">
-                <div class="kpi-icon-box">
-                    <i class="fa-solid fa-award"></i>
-                </div>
-                <div>
-                    <div class="kpi-val">{{ pass_percentage }}%</div>
-                    <div class="kpi-title">Pass Rate</div>
-                    <small class="text-muted" style="font-size: 0.72rem;">Zero Backlogs</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Analytics Charts Row 1 -->
-    <div class="row g-4 mb-4">
-        <!-- Chart 1: Average Marks by Subject -->
-        <div class="col-lg-7">
-            <div class="card-clean p-4 h-100">
-                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
-                    <div>
-                        <h6 class="fw-bold text-dark mb-0 fs-6">
-                            <i class="fa-solid fa-chart-column text-primary me-2"></i>Chart 1: Average Marks by Subject
-                        </h6>
-                        <small class="text-muted">Subject-wise performance distribution across MSBTE curriculum</small>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="kpi-card-refined kpi-purple">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="kpi-icon-square bg-purple-tint text-purple">
+                        <i class="fa-solid fa-users"></i>
                     </div>
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">
-                        Curriculum Stats
-                    </span>
+                    <a href="{{ url_for('admin.students_list') }}" class="kpi-arrow-btn text-purple">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
                 </div>
-                <div style="height: 290px; position: relative;">
-                    <canvas id="chartSubjectAvg"></canvas>
+                <div class="kpi-data-body mt-3">
+                    <div class="kpi-number count-up">{{ total_students }}</div>
+                    <div class="kpi-title-text">Total Students</div>
+                    <small class="kpi-subtext">Registered in System</small>
                 </div>
+                <!-- Subtle Mini Wave Glow -->
+                <div class="kpi-mini-wave wave-purple"></div>
             </div>
         </div>
 
-        <!-- Chart 2: Student Performance Categories -->
-        <div class="col-lg-5">
-            <div class="card-clean p-4 h-100">
-                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
-                    <div>
-                        <h6 class="fw-bold text-dark mb-0 fs-6">
-                            <i class="fa-solid fa-chart-pie text-indigo me-2"></i>Chart 2: Performance Categories
-                        </h6>
-                        <small class="text-muted">Student breakdown across 5 performance tiers</small>
+        <!-- 2. Average Score -->
+        <div class="col-6 col-md-4 col-xl">
+            <div class="kpi-card-refined kpi-mint">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="kpi-icon-square bg-mint-tint text-success">
+                        <i class="fa-solid fa-percent"></i>
                     </div>
-                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3">
-                        Tier Breakdown
-                    </span>
+                    <a href="{{ url_for('marks.list_marks') }}" class="kpi-arrow-btn text-success">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
                 </div>
-                <div style="height: 290px; position: relative;">
-                    <canvas id="chartPerformanceCategories"></canvas>
+                <div class="kpi-data-body mt-3">
+                    <div class="kpi-number count-up">{{ avg_percentage }}%</div>
+                    <div class="kpi-title-text">Average Score</div>
+                    <small class="kpi-subtext">All Subjects Aggregate</small>
                 </div>
+                <div class="kpi-mini-wave wave-mint"></div>
+            </div>
+        </div>
+
+        <!-- 3. Avg Attendance -->
+        <div class="col-6 col-md-4 col-xl">
+            <div class="kpi-card-refined kpi-orange">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="kpi-icon-square bg-orange-tint text-orange">
+                        <i class="fa-regular fa-calendar-check"></i>
+                    </div>
+                    <a href="{{ url_for('attendance.list_attendance') }}" class="kpi-arrow-btn text-orange">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+                <div class="kpi-data-body mt-3">
+                    <div class="kpi-number count-up">{{ avg_attendance }}%</div>
+                    <div class="kpi-title-text">Avg Attendance</div>
+                    <small class="kpi-subtext">Norm: &ge; 75% Required</small>
+                </div>
+                <div class="kpi-mini-wave wave-orange"></div>
+            </div>
+        </div>
+
+        <!-- 4. Need Attention -->
+        <div class="col-6 col-md-6 col-xl">
+            <div class="kpi-card-refined kpi-coral">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="kpi-icon-square bg-coral-tint text-danger">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <a href="{{ url_for('admin.defaulters_list') }}" class="kpi-arrow-btn text-danger">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+                <div class="kpi-data-body mt-3">
+                    <div class="kpi-number count-up">{{ at_risk_count }}</div>
+                    <div class="kpi-title-text">Need Attention</div>
+                    <small class="kpi-subtext">Early Warning Alerts</small>
+                </div>
+                <div class="kpi-mini-wave wave-coral"></div>
+            </div>
+        </div>
+
+        <!-- 5. Pass Rate -->
+        <div class="col-12 col-md-6 col-xl">
+            <div class="kpi-card-refined kpi-gold">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="kpi-icon-square bg-gold-tint text-warning">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <a href="{{ url_for('prediction.predict_page') }}" class="kpi-arrow-btn text-warning">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+                <div class="kpi-data-body mt-3">
+                    <div class="kpi-number count-up">{{ pass_percentage }}%</div>
+                    <div class="kpi-title-text">Pass Rate</div>
+                    <small class="kpi-subtext">Zero Backlogs</small>
+                </div>
+                <div class="kpi-mini-wave wave-gold"></div>
             </div>
         </div>
     </div>
 
-    <!-- Analytics Charts Row 2 -->
+    <!-- Main Grid: Charts & Side Action Panels -->
     <div class="row g-4 mb-4">
-        <!-- Chart 3: Attendance Distribution -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card-clean p-4 h-100">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h6 class="fw-bold text-dark mb-0 fs-6">
-                        <i class="fa-solid fa-user-check text-success me-2"></i>Chart 3: Attendance
-                    </h6>
-                    <small class="badge bg-light text-muted border rounded-pill">&ge;75% Norm</small>
+        <!-- Left 8 Columns: Charts -->
+        <div class="col-xl-9 col-lg-8">
+            <!-- Row 1 Charts: Average Marks & Performance Categories -->
+            <div class="row g-4 mb-4">
+                <!-- Chart 1: Average Marks by Subject -->
+                <div class="col-lg-7">
+                    <div class="dashboard-chart-card h-100 p-4">
+                        <div class="d-flex align-items-start justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="chart-header-icon bg-primary-tint text-primary">
+                                    <i class="fa-solid fa-chart-column"></i>
+                                </div>
+                                <div>
+                                    <h6 class="chart-card-title mb-0">Average Marks by Subject</h6>
+                                    <small class="text-muted" style="font-size: 0.76rem;">Subject-wise performance distribution across MSBTE curriculum</small>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light border rounded-pill px-3 py-1 dropdown-toggle chart-filter-pill" type="button" data-bs-toggle="dropdown">
+                                    Curriculum Stats
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 small">
+                                    <li><a class="dropdown-item" href="#">All Semesters</a></li>
+                                    <li><a class="dropdown-item" href="#">Semester 5</a></li>
+                                    <li><a class="dropdown-item" href="#">Semester 6</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div style="height: 280px; position: relative;">
+                            <canvas id="chartSubjectAvg"></canvas>
+                        </div>
+                    </div>
                 </div>
-                <div style="height: 220px; position: relative;">
-                    <canvas id="chartAttendanceDist"></canvas>
+
+                <!-- Chart 2: Performance Categories -->
+                <div class="col-lg-5">
+                    <div class="dashboard-chart-card h-100 p-4">
+                        <div class="d-flex align-items-start justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="chart-header-icon bg-purple-tint text-purple">
+                                    <i class="fa-solid fa-chart-pie"></i>
+                                </div>
+                                <div>
+                                    <h6 class="chart-card-title mb-0">Performance Categories</h6>
+                                    <small class="text-muted" style="font-size: 0.76rem;">Student breakdown across 5 performance tiers</small>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light border rounded-pill px-3 py-1 dropdown-toggle chart-filter-pill" type="button" data-bs-toggle="dropdown">
+                                    Tier Breakdown
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 small">
+                                    <li><a class="dropdown-item" href="#">Current Batch</a></li>
+                                    <li><a class="dropdown-item" href="#">Previous Year</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div style="height: 230px; position: relative;">
+                            <canvas id="chartPerformanceCategories"></canvas>
+                        </div>
+                        <!-- Tier Breakdown Indicators -->
+                        <div class="tier-legend-row d-flex flex-wrap justify-content-center gap-2 mt-2 pt-2 border-top">
+                            <span class="legend-item"><span class="legend-dot bg-success"></span> Excellent</span>
+                            <span class="legend-item"><span class="legend-dot bg-primary"></span> Good</span>
+                            <span class="legend-item"><span class="legend-dot bg-info"></span> Average</span>
+                            <span class="legend-item"><span class="legend-dot bg-warning"></span> Needs Improvement</span>
+                            <span class="legend-item"><span class="legend-dot bg-danger"></span> At Risk</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2 Charts: 3 Bottom Cards (Attendance Trend, Pass vs Backlogs, Sem Breakdown) -->
+            <div class="row g-4">
+                <!-- Bottom Chart 1: Attendance Trend -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="dashboard-chart-card h-100 p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="chart-header-icon bg-info-tint text-info" style="width: 32px; height: 32px;">
+                                    <i class="fa-solid fa-user-check" style="font-size: 0.85rem;"></i>
+                                </div>
+                                <div>
+                                    <h6 class="chart-card-title mb-0" style="font-size: 0.9rem;">Attendance Trend</h6>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Monthly attendance %</small>
+                                </div>
+                            </div>
+                            <span class="badge bg-light text-primary border rounded-pill px-2 py-1" style="font-size: 0.68rem; font-weight: 600;">
+                                &gt; 75% Norm
+                            </span>
+                        </div>
+                        <div style="height: 190px; position: relative;">
+                            <canvas id="chartAttendanceDist"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Chart 2: Pass vs Backlogs -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="dashboard-chart-card h-100 p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="chart-header-icon bg-purple-tint text-purple" style="width: 32px; height: 32px;">
+                                    <i class="fa-solid fa-chart-simple" style="font-size: 0.85rem;"></i>
+                                </div>
+                                <div>
+                                    <h6 class="chart-card-title mb-0" style="font-size: 0.9rem;">Pass vs Backlogs</h6>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Academic Clearance</small>
+                                </div>
+                            </div>
+                            <span class="badge bg-light text-muted border rounded-pill px-2 py-1" style="font-size: 0.68rem;">Status</span>
+                        </div>
+                        <div style="height: 190px; position: relative;">
+                            <canvas id="chartPassFail"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Chart 3: Semester Wise Breakdown -->
+                <div class="col-md-12 col-lg-4">
+                    <div class="dashboard-chart-card h-100 p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="chart-header-icon bg-gold-tint text-warning" style="width: 32px; height: 32px;">
+                                    <i class="fa-solid fa-layer-group" style="font-size: 0.85rem;"></i>
+                                </div>
+                                <div>
+                                    <h6 class="chart-card-title mb-0" style="font-size: 0.9rem;">Semester Wise Breakdown</h6>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Pass % vs Backlogs</small>
+                                </div>
+                            </div>
+                            <span class="badge bg-light text-muted border rounded-pill px-2 py-1" style="font-size: 0.68rem;">Sem 5 vs 6 &gt;</span>
+                        </div>
+                        <div style="height: 190px; position: relative;">
+                            <canvas id="chartSemesterPerf"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Chart 4: Pass vs Fail -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card-clean p-4 h-100">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h6 class="fw-bold text-dark mb-0 fs-6">
-                        <i class="fa-solid fa-chart-donut text-danger me-2"></i>Chart 4: Pass vs Backlogs
-                    </h6>
-                    <small class="badge bg-light text-muted border rounded-pill">Status</small>
+        <!-- Right 3/4 Columns: Quick Actions & Upcoming Reminders -->
+        <div class="col-xl-3 col-lg-4">
+            <!-- 1. Quick Actions Panel -->
+            <div class="side-panel-card p-4 mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="fa-solid fa-bolt text-primary"></i>
+                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem;">Quick Actions</h6>
                 </div>
-                <div style="height: 220px; position: relative;">
-                    <canvas id="chartPassFail"></canvas>
-                </div>
-            </div>
-        </div>
+                <div class="d-flex flex-column gap-2">
+                    <!-- Add Student Button (Purple-Blue Gradient) -->
+                    <a href="{{ url_for('admin.student_add') }}" class="action-btn-pill action-btn-primary">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Add Student</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right action-arrow"></i>
+                    </a>
 
-        <!-- Chart 5: Semester Comparison -->
-        <div class="col-md-12 col-lg-4">
-            <div class="card-clean p-4 h-100">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h6 class="fw-bold text-dark mb-0 fs-6">
-                        <i class="fa-solid fa-layer-group text-warning me-2"></i>Chart 5: Sem Breakdown
-                    </h6>
-                    <small class="badge bg-light text-muted border rounded-pill">Sem 5 vs 6</small>
-                </div>
-                <div style="height: 220px; position: relative;">
-                    <canvas id="chartSemesterPerf"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <!-- Enter Marks Button (Blue Tint) -->
+                    <a href="{{ url_for('marks.list_marks') }}" class="action-btn-pill action-btn-blue">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square text-primary"></i>
+                            <span>Enter Marks</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right action-arrow"></i>
+                    </a>
 
-    <!-- Performance Categories Legend & Academic Rules -->
-    <div class="card-clean p-4 mb-4">
-        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
-            <h6 class="fw-bold text-dark mb-0 fs-6">
-                <i class="fa-solid fa-tags text-primary me-2"></i>Project-Defined Performance Categories (Demo MSBTE Rules)
-            </h6>
-            <span class="badge bg-light text-muted border rounded-pill px-3 py-1" style="font-size: 0.72rem;">
-                Academic Demo Criteria
-            </span>
-        </div>
-        <div class="row g-2 text-center">
-            <div class="col">
-                <div class="p-3 rounded-3 bg-success-subtle border border-success-subtle shadow-sm">
-                    <div class="fw-bold text-success fs-6">Excellent</div>
-                    <small class="text-muted fw-semibold">90% – 100%</small>
+                    <!-- Bulk Upload Button (Mint Tint) -->
+                    <a href="{{ url_for('admin.bulk_upload') }}" class="action-btn-pill action-btn-mint">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-success"></i>
+                            <span>Bulk Upload</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right action-arrow"></i>
+                    </a>
+
+                    <!-- Generate Report Button (Orange Tint) -->
+                    <a href="{{ url_for('reports.powerbi_guide') }}" class="action-btn-pill action-btn-orange">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-file-lines text-warning"></i>
+                            <span>Generate Report</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right action-arrow"></i>
+                    </a>
                 </div>
             </div>
-            <div class="col">
-                <div class="p-3 rounded-3 bg-primary-subtle border border-primary-subtle shadow-sm">
-                    <div class="fw-bold text-primary fs-6">Good</div>
-                    <small class="text-muted fw-semibold">75% – 89%</small>
+
+            <!-- 2. Upcoming & Reminders Panel -->
+            <div class="side-panel-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-regular fa-calendar-days text-primary"></i>
+                        <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem;">Upcoming &amp; Reminders</h6>
+                    </div>
+                    <a href="#" class="text-primary text-decoration-none small fw-bold" style="font-size: 0.78rem;">View All</a>
                 </div>
-            </div>
-            <div class="col">
-                <div class="p-3 rounded-3 bg-info-subtle border border-info-subtle shadow-sm">
-                    <div class="fw-bold text-info fs-6">Average</div>
-                    <small class="text-muted fw-semibold">60% – 74%</small>
-                </div>
-            </div>
-            <div class="col">
-                <div class="p-3 rounded-3 bg-warning-subtle border border-warning-subtle shadow-sm">
-                    <div class="fw-bold text-warning-emphasis fs-6">Needs Improvement</div>
-                    <small class="text-muted fw-semibold">40% – 59%</small>
-                </div>
-            </div>
-            <div class="col">
-                <div class="p-3 rounded-3 bg-danger-subtle border border-danger-subtle shadow-sm">
-                    <div class="fw-bold text-danger fs-6">At Risk</div>
-                    <small class="text-muted fw-semibold">Below 40%</small>
+
+                <div class="reminder-items-list d-flex flex-column gap-3">
+                    <!-- Event 1 -->
+                    <div class="reminder-item d-flex align-items-center gap-3">
+                        <div class="date-badge-pill date-red">
+                            <span class="date-day">03</span>
+                            <span class="date-month">OCT</span>
+                        </div>
+                        <div class="reminder-content overflow-hidden">
+                            <div class="reminder-title text-truncate">Internal Assessment</div>
+                            <small class="reminder-sub text-truncate d-block">Submit marks for Sem 5</small>
+                        </div>
+                    </div>
+
+                    <!-- Event 2 -->
+                    <div class="reminder-item d-flex align-items-center gap-3">
+                        <div class="date-badge-pill date-blue">
+                            <span class="date-day">10</span>
+                            <span class="date-month">OCT</span>
+                        </div>
+                        <div class="reminder-content overflow-hidden">
+                            <div class="reminder-title text-truncate">Attendance Review</div>
+                            <small class="reminder-sub text-truncate d-block">Check &lt; 75% students</small>
+                        </div>
+                    </div>
+
+                    <!-- Event 3 -->
+                    <div class="reminder-item d-flex align-items-center gap-3">
+                        <div class="date-badge-pill date-orange">
+                            <span class="date-day">15</span>
+                            <span class="date-month">OCT</span>
+                        </div>
+                        <div class="reminder-content overflow-hidden">
+                            <div class="reminder-title text-truncate">Practical Exam</div>
+                            <small class="reminder-sub text-truncate d-block">Update marks in system</small>
+                        </div>
+                    </div>
+
+                    <!-- Event 4 -->
+                    <div class="reminder-item d-flex align-items-center gap-3">
+                        <div class="date-badge-pill date-purple">
+                            <span class="date-day">25</span>
+                            <span class="date-month">OCT</span>
+                        </div>
+                        <div class="reminder-content overflow-hidden">
+                            <div class="reminder-title text-truncate">Generate ATKT List</div>
+                            <small class="reminder-sub text-truncate d-block">Prepare early warning report</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -14,96 +14,100 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="theme-light-dashboard">
 
 {% if session.get('user_id') %}
 <div id="wrapper">
     <!-- Backdrop overlay for mobile devices -->
     <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 
-    <!-- Sleek Dark Sidebar -->
-    <div id="sidebar-wrapper">
+    <!-- Sleek Clean Modern Sidebar -->
+    <aside id="sidebar-wrapper">
         <!-- Sidebar Brand -->
         <div class="sidebar-brand d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-3">
-                <div class="brand-icon">
-                    <i class="fa-solid fa-graduation-cap fs-5 text-warning"></i>
+            <a href="{{ url_for('admin.dashboard') if session.get('role') == 'admin' else url_for('student.profile') }}" class="d-flex align-items-center gap-3 text-decoration-none">
+                <div class="brand-icon-squircle">
+                    <svg width="24" height="24" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M32 10L58 23L32 36L6 23L32 10Z" fill="#fcd34d" stroke="#d97706" stroke-width="2"/>
+                        <path d="M16 28.5V40C16 46 23.16 51 32 51C40.84 51 48 46 48 40V28.5L32 36.5L16 28.5Z" fill="#fbbf24" stroke="#b45309" stroke-width="2"/>
+                        <circle cx="32" cy="23" r="3.5" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+                        <path d="M32 23C32 23 44 26 46 33C46.8 35.8 46.5 44 46.5 44" stroke="#fef08a" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle cx="46.5" cy="45" r="3.5" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/>
+                    </svg>
                 </div>
                 <div>
-                    <h6 class="mb-0 fw-bold text-white tracking-wide" style="font-family: 'Outfit', sans-serif;">MSBTE STUDENT SAVER</h6>
-                    <small class="text-secondary" style="font-size: 0.72rem; letter-spacing: 0.4px;">Diploma Academic Saver</small>
+                    <h6 class="mb-0 fw-bold text-dark tracking-wide brand-title-text" style="font-family: 'Outfit', sans-serif;">MSBTE<br>Student Saver</h6>
+                    <small class="text-muted" style="font-size: 0.7rem; font-weight: 500;">Diploma Academic Tool</small>
                 </div>
-            </div>
-            <button class="btn btn-sm text-white-50 p-1 border-0 d-lg-none" id="sidebarClose" title="Close Sidebar">
+            </a>
+            <button class="btn btn-sm text-secondary p-1 border-0 d-lg-none" id="sidebarClose" title="Close Sidebar">
                 <i class="fa-solid fa-xmark fs-5"></i>
             </button>
-        </div>
-
-        <!-- User Profile Badge -->
-        <div class="user-profile-card d-flex align-items-center gap-3 mt-3">
-            <div class="avatar text-white fw-bold rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                 style="width: 40px; height: 40px; font-size: 1rem; background: var(--primary-gradient);">
-                {{ session.get('username', 'U')[0]|upper }}
-            </div>
-            <div class="overflow-hidden">
-                <div class="fw-bold text-white text-truncate" style="font-size: 0.9rem;">{{ session.get('username') }}</div>
-                <span class="badge {% if session.get('role') == 'admin' %}bg-primary{% else %}bg-info text-dark{% endif %} text-uppercase rounded-pill" style="font-size: 0.65rem; font-weight: 700;">
-                    <i class="fa-solid {% if session.get('role') == 'admin' %}fa-shield-halved{% else %}fa-user{% endif %} me-1"></i>{{ session.get('role') }}
-                </span>
-            </div>
         </div>
 
         <!-- Sidebar Navigation Menu -->
         <div class="sidebar-nav">
             {% if session.get('role') == 'admin' %}
             <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
-                <i class="fa-solid fa-chart-pie text-indigo"></i>
+                <i class="fa-solid fa-house"></i>
                 <span>Dashboard</span>
             </a>
             <a href="{{ url_for('admin.students_list') }}" class="nav-link {% if request.endpoint in ['admin.students_list', 'admin.student_detail', 'admin.student_add', 'admin.student_edit'] %}active{% endif %}">
-                <i class="fa-solid fa-user-graduate text-info"></i>
+                <i class="fa-solid fa-users"></i>
                 <span>Students</span>
             </a>
-            <a href="{{ url_for('admin.defaulters_list') }}" class="nav-link {% if request.endpoint == 'admin.defaulters_list' %}active{% endif %}">
+            <a href="{{ url_for('admin.defaulters_list') }}" class="nav-link nav-link-warning {% if request.endpoint == 'admin.defaulters_list' %}active{% endif %}">
                 <i class="fa-solid fa-triangle-exclamation text-danger"></i>
-                <span>Defaulters (< 75%)</span>
+                <span>Defaulters (&lt; 75%)</span>
             </a>
             <a href="{{ url_for('prediction.simulator_page') }}" class="nav-link {% if request.endpoint == 'prediction.simulator_page' %}active{% endif %}">
-                <i class="fa-solid fa-sliders text-purple"></i>
+                <i class="fa-solid fa-chart-line"></i>
                 <span>What-If Simulator</span>
             </a>
             <a href="{{ url_for('admin.subjects_list') }}" class="nav-link {% if request.endpoint and 'subject' in request.endpoint %}active{% endif %}">
-                <i class="fa-solid fa-book-bookmark text-warning"></i>
+                <i class="fa-solid fa-book-bookmark"></i>
                 <span>MSBTE Subjects</span>
             </a>
             <a href="{{ url_for('marks.list_marks') }}" class="nav-link {% if request.endpoint and 'marks' in request.endpoint %}active{% endif %}">
-                <i class="fa-solid fa-pen-to-square text-success"></i>
+                <i class="fa-solid fa-pen-to-square"></i>
                 <span>Enter Marks</span>
             </a>
             <a href="{{ url_for('attendance.list_attendance') }}" class="nav-link {% if request.endpoint and 'attendance' in request.endpoint %}active{% endif %}">
-                <i class="fa-solid fa-calendar-check text-cyan"></i>
+                <i class="fa-solid fa-calendar-check"></i>
                 <span>Attendance</span>
             </a>
             <a href="{{ url_for('prediction.predict_page') }}" class="nav-link {% if request.endpoint == 'prediction.predict_page' %}active{% endif %}">
-                <i class="fa-solid fa-brain text-danger"></i>
+                <i class="fa-solid fa-brain"></i>
                 <span>ML Early Warning</span>
             </a>
             <a href="{{ url_for('admin.capstone_projects') }}" class="nav-link {% if request.endpoint == 'admin.capstone_projects' %}active{% endif %}">
-                <i class="fa-solid fa-graduation-cap text-warning"></i>
+                <i class="fa-solid fa-graduation-cap"></i>
                 <span>Capstone & ATKT</span>
             </a>
             <a href="{{ url_for('admin.bulk_upload') }}" class="nav-link {% if request.endpoint == 'admin.bulk_upload' %}active{% endif %}">
-                <i class="fa-solid fa-cloud-arrow-up text-info"></i>
+                <i class="fa-solid fa-cloud-arrow-up"></i>
                 <span>Bulk Data Upload</span>
             </a>
             <a href="{{ url_for('reports.powerbi_guide') }}" class="nav-link {% if request.endpoint and 'powerbi' in request.endpoint %}active{% endif %}">
-                <i class="fa-solid fa-file-csv text-warning"></i>
+                <i class="fa-solid fa-chart-simple"></i>
                 <span>Power BI & CSV</span>
             </a>
+
+            <div class="sidebar-divider my-2"></div>
+
+            <a href="#" class="nav-link">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+            <a href="#" class="nav-link">
+                <i class="fa-solid fa-circle-question"></i>
+                <span>Help & Support</span>
+            </a>
+
             {% else %}
             <!-- Student View Menu -->
             <a href="{{ url_for('student.profile') }}" class="nav-link active">
-                <i class="fa-solid fa-user text-info"></i>
+                <i class="fa-solid fa-user"></i>
                 <span>My Academic Profile</span>
             </a>
             {% if linked_student %}
@@ -113,50 +117,82 @@
             </a>
             {% endif %}
             {% endif %}
-
-            <div class="my-3 border-top border-secondary border-opacity-25"></div>
-
-            <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger-emphasis">
-                <i class="fa-solid fa-right-from-bracket text-danger"></i>
-                <span>Sign Out</span>
-            </a>
         </div>
 
-        <div class="p-3 text-center text-secondary border-top border-secondary border-opacity-10 mt-auto" style="font-size: 0.75rem;">
-            <div class="text-white-50 fw-semibold">MSBTE Student Saver</div>
-            <div class="text-muted" style="font-size: 0.68rem;">Academic Performance & Early Warning</div>
+        <!-- Sidebar Bottom Promo Card -->
+        <div class="sidebar-bottom-promo p-3">
+            <div class="promo-card d-flex align-items-center justify-content-between p-2 px-3 rounded-4">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="promo-icon">🎓</span>
+                    <div>
+                        <div class="promo-text-italic">Better Data</div>
+                        <div class="promo-text-sub">Brighter Futures</div>
+                    </div>
+                </div>
+                <div class="promo-arrow-circle">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
         </div>
-    </div>
+    </aside>
     <!-- /#sidebar-wrapper -->
 
     <!-- Main Content Area -->
     <div id="page-content-wrapper">
-        <!-- Top Navbar -->
-        <nav class="top-navbar d-flex align-items-center justify-content-between">
+        <!-- Top Modern Header Navbar -->
+        <header class="top-navbar-modern d-flex align-items-center justify-content-between px-4 py-3">
             <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-outline-secondary btn-sm rounded-3 px-3" id="sidebarToggle" title="Toggle Navigation Sidebar">
-                    <i class="fa-solid fa-bars"></i>
+                <button class="btn btn-light rounded-circle shadow-sm p-2 border toggle-sidebar-btn" id="sidebarToggle" title="Toggle Sidebar">
+                    <i class="fa-solid fa-bars fs-6 text-dark"></i>
                 </button>
-                <div class="d-none d-md-flex align-items-center gap-2">
-                    <span class="fw-bold text-dark" style="font-size: 0.95rem; font-family: 'Outfit', sans-serif;">
-                        MSBTE Student Saver - Academic Performance & Early Warning System
-                    </span>
-                </div>
-                <div class="d-flex d-md-none align-items-center gap-2">
-                    <i class="fa-solid fa-graduation-cap text-warning"></i>
-                    <span class="fw-bold text-dark" style="font-size: 0.92rem; font-family: 'Outfit', sans-serif;">MSBTE Saver</span>
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark" style="font-family: 'Outfit', sans-serif; font-size: 1.05rem;">
+                        MSBTE Student Saver
+                    </h5>
+                    <small class="text-muted d-none d-md-block" style="font-size: 0.78rem;">
+                        Academic Performance & Early Warning System
+                    </small>
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <span class="badge bg-light text-dark border rounded-pill px-3 py-2 d-none d-sm-inline shadow-sm">
-                    <i class="fa-regular fa-clock me-1 text-primary"></i> AY 2025-2026 &bull; Sem 5 & 6
-                </span>
-                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                    <i class="fa-solid fa-power-off me-1"></i> Logout
-                </a>
+            <!-- Global Search Pill Input -->
+            <div class="header-search-bar d-none d-lg-flex align-items-center">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" placeholder="Search students, subjects, or anything..." class="search-input" id="globalSearchInput">
+                <span class="search-badge">Ctrl K</span>
             </div>
-        </nav>
+
+            <!-- Right Header Profile & Tools -->
+            <div class="d-flex align-items-center gap-3">
+                <!-- Academic Year Badge -->
+                <div class="academic-year-pill d-none d-sm-flex align-items-center gap-2">
+                    <i class="fa-regular fa-calendar text-primary"></i>
+                    <span>AY 2025-2026 &bull; Sem 5 & 6</span>
+                </div>
+
+                <!-- Notification Bell -->
+                <div class="notification-btn-wrapper position-relative">
+                    <button class="btn btn-light rounded-circle shadow-sm border p-2 text-dark">
+                        <i class="fa-regular fa-bell"></i>
+                    </button>
+                    <span class="notification-badge">3</span>
+                </div>
+
+                <!-- User Profile & Dropdown -->
+                <div class="d-flex align-items-center gap-2 ps-2">
+                    <div class="user-avatar-circle">
+                        {{ session.get('username', 'A')[0]|upper }}
+                    </div>
+                    <div class="d-none d-md-block text-start lh-sm">
+                        <div class="fw-bold text-dark" style="font-size: 0.85rem;">{{ session.get('username') }}</div>
+                        <small class="text-muted" style="font-size: 0.72rem; text-transform: capitalize;">{{ session.get('role') }}</small>
+                    </div>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-danger rounded-circle p-2 ms-1" title="Sign Out">
+                        <i class="fa-solid fa-power-off" style="font-size: 0.75rem;"></i>
+                    </a>
+                </div>
+            </div>
+        </header>
 
         <!-- Main Body Content -->
         <main class="main-container">
@@ -164,7 +200,7 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm d-flex align-items-center justify-content-between p-3 rounded-3 mb-4 border-0" role="alert">
+                        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm d-flex align-items-center justify-content-between p-3 rounded-4 mb-4 border-0" role="alert">
                             <div class="d-flex align-items-center gap-2">
                                 {% if category == 'success' %}
                                     <i class="fa-solid fa-circle-check fs-5 text-success"></i>
@@ -188,14 +224,14 @@
     </div>
 </div>
 {% else %}
-    <!-- Public View Screen -->
+    <!-- Public View Screen (Login etc.) -->
     {% block public_content %}{% endblock %}
 {% endif %}
 
 <!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Main JS -->
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
